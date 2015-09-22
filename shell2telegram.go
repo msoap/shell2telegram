@@ -16,7 +16,7 @@ const VERSION = "1.0"
 
 func main() {
 	flag.Usage = func() {
-		fmt.Printf("usage: %s [options] /path \"shell command\" /path2 \"shell command2\"\n", os.Args[0])
+		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
@@ -30,7 +30,7 @@ func main() {
 	// need >= 2 arguments and count of it must be even
 	args := flag.Args()
 	if len(args) < 2 || len(args)%2 == 1 {
-		log.Panic(fmt.Errorf("error: need pairs of path and shell command"))
+		log.Fatal("error: need pairs of path and shell command")
 	}
 
 	cmd_handlers := map[string]string{}
@@ -38,19 +38,19 @@ func main() {
 	for i := 0; i < len(args); i += 2 {
 		path, cmd := args[i], args[i+1]
 		if path[0] != '/' {
-			log.Panic(fmt.Errorf("error: path %s dont starts with /", path))
+			log.Fatalf("error: path %s dont starts with /", path)
 		}
 		cmd_handlers[path] = cmd
 	}
 
 	tb_token := os.Getenv("TB_TOKEN")
 	if tb_token == "" {
-		log.Panic("TB_TOKEN env var not found")
+		log.Fatal("TB_TOKEN env var not found")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(tb_token)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
