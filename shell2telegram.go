@@ -66,17 +66,16 @@ func main() {
 			chat_id := update.Message.Chat.ID
 
 			parts := regexp.MustCompile(`\s+`).Split(update.Message.Text, 2)
+			replay_msg := ""
+
 			if len(parts) > 0 {
 				if parts[0] == "/help" {
-					reply := ""
 					for cmd, shell_cmd := range cmd_handlers {
-						reply += fmt.Sprintf("%s\n %s\n", cmd, shell_cmd)
+						replay_msg += fmt.Sprintf("%s\n %s\n", cmd, shell_cmd)
 					}
-					msg := tgbotapi.NewMessage(chat_id, reply)
-					bot.SendMessage(msg)
-				}
 
-				if cmd, found := cmd_handlers[parts[0]]; found {
+				} else if cmd, found := cmd_handlers[parts[0]]; found {
+
 					shell, params := "sh", []string{"-c", cmd}
 					if len(parts) > 1 {
 						params = append(params, parts[1])
@@ -87,15 +86,15 @@ func main() {
 					shell_out, err := os_exec_command.Output()
 					if err != nil {
 						log.Println("exec error: ", err)
-						reply := fmt.Sprintf("exec error: %s", err)
-						msg := tgbotapi.NewMessage(chat_id, reply)
-						bot.SendMessage(msg)
+						replay_msg = fmt.Sprintf("exec error: %s", err)
 					} else {
-						reply := string(shell_out)
-						msg := tgbotapi.NewMessage(chat_id, reply)
-						bot.SendMessage(msg)
+						replay_msg = string(shell_out)
 					}
 				}
+			}
+
+			if replay_msg != "" {
+				bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
 			}
 		}
 	}
