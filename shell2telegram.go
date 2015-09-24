@@ -83,6 +83,8 @@ func main() {
 	ucfg.Timeout = 60
 	err = bot.UpdatesChan(ucfg)
 
+	go_exit := false
+LOOP:
 	for {
 		select {
 		case update := <-bot.Updates:
@@ -92,7 +94,7 @@ func main() {
 			parts := regexp.MustCompile(`\s+`).Split(update.Message.Text, 2)
 			replay_msg := ""
 
-			if len(parts) > 0 {
+			if len(parts) > 0 && parts[0][0] == '/' {
 				if parts[0] == "/help" {
 					for cmd, shell_cmd := range commands {
 						replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
@@ -103,8 +105,7 @@ func main() {
 
 				} else if app_config.addExit && parts[0] == "/exit" {
 					replay_msg = "bye..."
-					bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
-					os.Exit(0)
+					go_exit = true
 				} else if cmd, found := commands[parts[0]]; found {
 
 					shell, params := "sh", []string{"-c", cmd}
@@ -122,10 +123,13 @@ func main() {
 						replay_msg = string(shell_out)
 					}
 				}
-			}
 
-			if replay_msg != "" {
-				bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+				if replay_msg != "" {
+					bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+					if go_exit {
+						break LOOP
+					}
+				}
 			}
 		}
 	}
