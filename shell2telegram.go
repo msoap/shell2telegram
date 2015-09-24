@@ -14,7 +14,21 @@ import (
 // version
 const VERSION = "1.0"
 
-func main() {
+// Command - one command type
+type Commands map[string]string
+
+// Config - config struct
+type Config struct {
+	token   string // bot token
+	addExit bool   // add /exit command
+}
+
+// ------------------------------------------------------------------
+// get config
+func getConfig() (commands Commands, app_config Config, err error) {
+	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
+	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
+
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
 		flag.PrintDefaults()
@@ -27,28 +41,38 @@ func main() {
 		os.Exit(0)
 	}
 
+	commands = Commands{}
 	// need >= 2 arguments and count of it must be even
 	args := flag.Args()
 	if len(args) < 2 || len(args)%2 == 1 {
-		log.Fatal("error: need pairs of path and shell command")
+		return commands, app_config, fmt.Errorf("error: need pairs of chat-command and shell-command")
 	}
-
-	cmd_handlers := map[string]string{}
 
 	for i := 0; i < len(args); i += 2 {
 		path, cmd := args[i], args[i+1]
 		if path[0] != '/' {
-			log.Fatalf("error: path %s dont starts with /", path)
+			return commands, app_config, fmt.Errorf("error: path %s dont starts with /", path)
 		}
-		cmd_handlers[path] = cmd
+		commands[path] = cmd
 	}
 
-	tb_token := os.Getenv("TB_TOKEN")
-	if tb_token == "" {
-		log.Fatal("TB_TOKEN env var not found. See https://core.telegram.org/bots#botfather for more information\n")
+	if app_config.token == "" {
+		if app_config.token = os.Getenv("TB_TOKEN"); app_config.token == "" {
+			return commands, app_config, fmt.Errorf("TB_TOKEN env var not found. See https://core.telegram.org/bots#botfather for more information\n")
+		}
 	}
 
-	bot, err := tgbotapi.NewBotAPI(tb_token)
+	return commands, app_config, nil
+}
+
+// ------------------------------------------------------------------
+func main() {
+	commands, app_config, err := getConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	bot, err := tgbotapi.NewBotAPI(app_config.token)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,11 +94,18 @@ func main() {
 
 			if len(parts) > 0 {
 				if parts[0] == "/help" {
-					for cmd, shell_cmd := range cmd_handlers {
-						replay_msg += fmt.Sprintf("%s\n %s\n", cmd, shell_cmd)
+					for cmd, shell_cmd := range commands {
+						replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
+					}
+					if app_config.addExit {
+						replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
 					}
 
-				} else if cmd, found := cmd_handlers[parts[0]]; found {
+				} else if app_config.addExit && parts[0] == "/exit" {
+					replay_msg = "bye..."
+					bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+					os.Exit(0)
+				} else if cmd, found := commands[parts[0]]; found {
 
 					shell, params := "sh", []string{"-c", cmd}
 					if len(parts) > 1 {
