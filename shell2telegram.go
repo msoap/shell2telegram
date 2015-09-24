@@ -136,7 +136,7 @@ LOOP:
 						replay_msg = "See code in terminal with shell2telegram and type:\n/auth code"
 						users[user_from.ID].IsAuthorized = false
 						users[user_from.ID].AuthCode = getRandomCode()
-						fmt.Println("Code:", users[user_from.ID].AuthCode)
+						fmt.Printf("Code (for %s): %s\n", user_from.UserName, users[user_from.ID].AuthCode)
 					} else if len(parts) > 1 && parts[1] != "" && parts[1] == users[user_from.ID].AuthCode {
 						users[user_from.ID].IsAuthorized = true
 						replay_msg = fmt.Sprintf("You (%s) authorized.", user_from.UserName)
