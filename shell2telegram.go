@@ -45,7 +45,7 @@ func main() {
 
 	tb_token := os.Getenv("TB_TOKEN")
 	if tb_token == "" {
-		log.Fatal("TB_TOKEN env var not found")
+		log.Fatal("TB_TOKEN env var not found. See https://core.telegram.org/bots#botfather for more information\n")
 	}
 
 	bot, err := tgbotapi.NewBotAPI(tb_token)
