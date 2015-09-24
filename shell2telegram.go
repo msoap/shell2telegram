@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -22,6 +24,15 @@ type Config struct {
 	token   string // bot token
 	addExit bool   // add /exit command
 }
+
+// Users in chat
+type User struct {
+	UserName     string
+	AuthCode     string
+	IsAuthorized bool
+}
+
+type Users map[int]*User
 
 // ------------------------------------------------------------------
 // get config
@@ -66,6 +77,17 @@ func getConfig() (commands Commands, app_config Config, err error) {
 }
 
 // ------------------------------------------------------------------
+func getRandomCode() string {
+	buffer := make([]byte, 15)
+	_, err := rand.Read(buffer)
+	if err != nil {
+		log.Fatal("Get code error:", err)
+	}
+
+	return base64.URLEncoding.EncodeToString(buffer)
+}
+
+// ------------------------------------------------------------------
 func main() {
 	commands, app_config, err := getConfig()
 	if err != nil {
@@ -84,29 +106,61 @@ func main() {
 	err = bot.UpdatesChan(ucfg)
 
 	go_exit := false
+	users := make(Users)
+
 LOOP:
 	for {
 		select {
-		case update := <-bot.Updates:
+		case telegram_update := <-bot.Updates:
 
-			chat_id := update.Message.Chat.ID
+			chat_id := telegram_update.Message.Chat.ID
 
-			parts := regexp.MustCompile(`\s+`).Split(update.Message.Text, 2)
+			parts := regexp.MustCompile(`\s+`).Split(telegram_update.Message.Text, 2)
 			replay_msg := ""
 
 			if len(parts) > 0 && parts[0][0] == '/' {
-				if parts[0] == "/help" {
-					for cmd, shell_cmd := range commands {
-						replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
+
+				user_from := telegram_update.Message.From
+				if _, ok := users[user_from.ID]; !ok {
+					users[user_from.ID] = &User{
+						UserName:     user_from.UserName,
+						AuthCode:     "",
+						IsAuthorized: false,
 					}
-					if app_config.addExit {
-						replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
+				}
+				allowExec := users[user_from.ID].IsAuthorized
+
+				if parts[0] == "/auth" {
+
+					if len(parts) == 1 || parts[1] == "" {
+						replay_msg = "See code in terminal with shell2telegram and type:\n/auth code"
+						users[user_from.ID].IsAuthorized = false
+						users[user_from.ID].AuthCode = getRandomCode()
+						fmt.Println("Code:", users[user_from.ID].AuthCode)
+					} else if len(parts) > 1 && parts[1] != "" && parts[1] == users[user_from.ID].AuthCode {
+						users[user_from.ID].IsAuthorized = true
+						replay_msg = fmt.Sprintf("You (%s) authorized.", user_from.UserName)
+					} else if len(parts) > 1 && parts[1] != "" && parts[1] != users[user_from.ID].AuthCode {
+						replay_msg = fmt.Sprintf("Code is not valid.")
 					}
 
-				} else if app_config.addExit && parts[0] == "/exit" {
+				} else if parts[0] == "/help" {
+
+					if allowExec {
+						for cmd, shell_cmd := range commands {
+							replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
+						}
+						if app_config.addExit {
+							replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
+						}
+					} else {
+						replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "auth user")
+					}
+
+				} else if allowExec && app_config.addExit && parts[0] == "/exit" {
 					replay_msg = "bye..."
 					go_exit = true
-				} else if cmd, found := commands[parts[0]]; found {
+				} else if cmd, found := commands[parts[0]]; allowExec && found {
 
 					shell, params := "sh", []string{"-c", cmd}
 					if len(parts) > 1 {
