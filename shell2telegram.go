@@ -153,9 +153,8 @@ LOOP:
 						if app_config.addExit {
 							replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
 						}
-					} else {
-						replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "auth user")
 					}
+					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
 
 				} else if allowExec && app_config.addExit && parts[0] == "/exit" {
 					replay_msg = "bye..."
