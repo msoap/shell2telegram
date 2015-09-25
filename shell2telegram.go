@@ -121,16 +121,20 @@ LOOP:
 			if len(parts) > 0 && parts[0][0] == '/' {
 
 				user_from := telegram_update.Message.From
-				if _, ok := users[user_from.ID]; !ok {
-					users[user_from.ID] = &User{
-						UserName:     user_from.UserName,
-						AuthCode:     "",
-						IsAuthorized: false,
-					}
+				allowExec := false
+				if _, ok := users[user_from.ID]; ok {
+					allowExec = users[user_from.ID].IsAuthorized
 				}
-				allowExec := users[user_from.ID].IsAuthorized
 
 				if parts[0] == "/auth" {
+
+					if _, ok := users[user_from.ID]; !ok {
+						users[user_from.ID] = &User{
+							UserName:     user_from.UserName,
+							AuthCode:     "",
+							IsAuthorized: false,
+						}
+					}
 
 					if len(parts) == 1 || parts[1] == "" {
 						replay_msg = "See code in terminal with shell2telegram and type:\n/auth code"
