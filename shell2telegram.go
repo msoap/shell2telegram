@@ -118,7 +118,7 @@ LOOP:
 			parts := regexp.MustCompile(`\s+`).Split(telegram_update.Message.Text, 2)
 			replay_msg := ""
 
-			if len(parts) > 0 && parts[0][0] == '/' {
+			if len(parts) > 0 && len(parts[0]) > 0 && parts[0][0] == '/' {
 
 				user_from := telegram_update.Message.From
 				allowExec := false
