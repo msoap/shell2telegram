@@ -56,29 +56,29 @@ func NewUsers(appConfig Config) Users {
 }
 
 // add new user if not exists
-func (users Users) AddNew(tgbot_user tgbotapi.User, tgbot_chat tgbotapi.UserOrGroupChat) {
+func (users Users) AddNew(tgbot_message tgbotapi.Message) {
 	privateChatID := 0
-	if tgbot_chat.Title == "" {
-		privateChatID = tgbot_chat.ID
+	if !tgbot_message.IsGroup() {
+		privateChatID = tgbot_message.Chat.ID
 	}
 
-	if _, ok := users.list[tgbot_user.ID]; ok && privateChatID > 0 {
-		users.list[tgbot_user.ID].PrivateChatID = privateChatID
+	if _, ok := users.list[tgbot_message.From.ID]; ok && privateChatID > 0 {
+		users.list[tgbot_message.From.ID].PrivateChatID = privateChatID
 	} else if !ok {
-		users.list[tgbot_user.ID] = &User{
-			UserName:      tgbot_user.UserName,
-			FirstName:     tgbot_user.FirstName,
-			LastName:      tgbot_user.LastName,
-			IsAuthorized:  users.allowedUsers[tgbot_user.UserName],
-			IsRoot:        users.rootUsers[tgbot_user.UserName],
+		users.list[tgbot_message.From.ID] = &User{
+			UserName:      tgbot_message.From.UserName,
+			FirstName:     tgbot_message.From.FirstName,
+			LastName:      tgbot_message.From.LastName,
+			IsAuthorized:  users.allowedUsers[tgbot_message.From.UserName],
+			IsRoot:        users.rootUsers[tgbot_message.From.UserName],
 			PrivateChatID: privateChatID,
 		}
 	}
 
 	// collect stat
-	users.list[tgbot_user.ID].LastAccessTime = time.Now()
-	if users.list[tgbot_user.ID].IsAuthorized {
-		users.list[tgbot_user.ID].Counter++
+	users.list[tgbot_message.From.ID].LastAccessTime = time.Now()
+	if users.list[tgbot_message.From.ID].IsAuthorized {
+		users.list[tgbot_message.From.ID].Counter++
 	}
 }
 

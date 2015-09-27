@@ -140,7 +140,7 @@ LOOP:
 
 				user_from := telegram_update.Message.From
 
-				users.AddNew(user_from, telegram_update.Message.Chat)
+				users.AddNew(telegram_update.Message)
 				allowExec := app_config.allowAll || users.IsAuthorized(user_from.ID)
 
 				if messageCmd == "/auth" || messageCmd == "/authroot" {
