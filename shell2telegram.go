@@ -24,6 +24,7 @@ type Config struct {
 	addExit    bool     // add /exit command
 	botTimeout int      // bot timeout
 	allowUsers []string // users telegram-names who allow chats with bot
+	rootUsers  []string // users telegram-names who confirm new users through of it private chat
 }
 
 // ------------------------------------------------------------------
@@ -32,7 +33,8 @@ func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
 	flag.IntVar(&app_config.botTimeout, "timeout", 60, "bot timeout")
-	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot")
+	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
+	rootUsers := flag.String("root-users", "", "users telegram-names who confirm new users through of it private chat (\"user1,user2\")")
 
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
@@ -48,6 +50,9 @@ func getConfig() (commands Commands, app_config Config, err error) {
 
 	if *allowUsers != "" {
 		app_config.allowUsers = strings.Split(*allowUsers, ",")
+	}
+	if *rootUsers != "" {
+		app_config.rootUsers = strings.Split(*rootUsers, ",")
 	}
 
 	commands = Commands{}
@@ -96,7 +101,7 @@ func main() {
 	}
 
 	go_exit := false
-	users := NewUsers(app_config.allowUsers)
+	users := NewUsers(app_config)
 
 LOOP:
 	for {
@@ -111,19 +116,24 @@ LOOP:
 			if len(parts) > 0 && len(parts[0]) > 0 && parts[0][0] == '/' {
 
 				user_from := telegram_update.Message.From
+
+				users.AddNew(user_from, telegram_update.Message.Chat)
 				allowExec := users.IsAuthorized(user_from)
 
 				if parts[0] == "/auth" {
 
-					users.AddNew(user_from.ID, user_from.UserName)
-
 					if len(parts) == 1 || parts[1] == "" {
-						replay_msg = "See code in terminal with shell2telegram and type:\n/auth code"
+
+						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n/auth code"
 						users.DoLogin(user_from.ID)
-						fmt.Printf("Code (for %s): %s\n", user_from.UserName, users.list[user_from.ID].AuthCode)
+
+						secretCodeMsg := fmt.Sprintf("Request access for %s. Code: %s\n", users.String(user_from.ID), users.list[user_from.ID].AuthCode)
+						fmt.Print(secretCodeMsg)
+						users.broadcastForRoots(bot, secretCodeMsg)
+
 					} else if len(parts) > 1 {
 						if users.IsValidCode(user_from.ID, parts[1]) {
-							replay_msg = fmt.Sprintf("You (%s) authorized.", user_from.UserName)
+							replay_msg = fmt.Sprintf("You (@%s) authorized.", user_from.UserName)
 						} else {
 							replay_msg = fmt.Sprintf("Code is not valid.")
 						}

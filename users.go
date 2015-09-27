@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 	"log"
 
 	"github.com/Syfaro/telegram-bot-api"
@@ -10,40 +11,60 @@ import (
 
 // One User
 type User struct {
-	UserName     string
-	AuthCode     string
-	IsAuthorized bool
+	UserName      string
+	FirstName     string
+	LastName      string
+	AuthCode      string
+	IsAuthorized  bool
+	IsRoot        bool
+	PrivateChatID int
 }
 
 // Users in chat
 type Users struct {
-	list             map[int]*User
-	listAllowedUsers map[string]bool
+	list         map[int]*User
+	allowedUsers map[string]bool
+	rootUsers    map[string]bool
 }
 
 // length of random code in bytes
 const CODE_BYTES_LENGTH = 15
 
 // new Users object
-func NewUsers(allowUsers []string) Users {
+func NewUsers(appConfig Config) Users {
 	users := Users{
-		list:             map[int]*User{},
-		listAllowedUsers: map[string]bool{},
+		list:         map[int]*User{},
+		allowedUsers: map[string]bool{},
+		rootUsers:    map[string]bool{},
 	}
 
-	for _, name := range allowUsers {
-		users.listAllowedUsers[name] = true
+	for _, name := range appConfig.allowUsers {
+		users.allowedUsers[name] = true
+	}
+	for _, name := range appConfig.rootUsers {
+		users.allowedUsers[name] = true
+		users.rootUsers[name] = true
 	}
 	return users
 }
 
 // add new user if not exists
-func (users Users) AddNew(user_id int, user_name string) {
-	if _, ok := users.list[user_id]; !ok {
-		users.list[user_id] = &User{
-			UserName:     user_name,
-			AuthCode:     "",
-			IsAuthorized: users.listAllowedUsers[user_name],
+func (users Users) AddNew(tgbot_user tgbotapi.User, tgbot_chat tgbotapi.UserOrGroupChat) {
+	privateChatID := 0
+	if tgbot_chat.Title == "" {
+		privateChatID = tgbot_chat.ID
+	}
+
+	if _, ok := users.list[tgbot_user.ID]; ok && privateChatID > 0 {
+		users.list[tgbot_user.ID].PrivateChatID = privateChatID
+	} else if !ok {
+		users.list[tgbot_user.ID] = &User{
+			UserName:      tgbot_user.UserName,
+			FirstName:     tgbot_user.FirstName,
+			LastName:      tgbot_user.LastName,
+			IsAuthorized:  users.allowedUsers[tgbot_user.UserName],
+			IsRoot:        users.rootUsers[tgbot_user.UserName],
+			PrivateChatID: privateChatID,
 		}
 	}
 }
@@ -67,13 +88,31 @@ func (users Users) IsValidCode(user_id int, code string) bool {
 // check code for user
 func (users Users) IsAuthorized(tgbot_user tgbotapi.User) bool {
 	isAuthorized := false
-	if tgbot_user.UserName != "" && users.listAllowedUsers[tgbot_user.UserName] {
+	if tgbot_user.UserName != "" && users.allowedUsers[tgbot_user.UserName] {
 		isAuthorized = true
 	} else if _, ok := users.list[tgbot_user.ID]; ok && users.list[tgbot_user.ID].IsAuthorized {
 		isAuthorized = true
 	}
 
 	return isAuthorized
+}
+
+// send message to all root users
+func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
+	for _, user := range users.list {
+		if user.IsRoot && user.PrivateChatID > 0 {
+			bot.SendMessage(tgbotapi.NewMessage(user.PrivateChatID, message))
+		}
+	}
+}
+
+// Format user name
+func (users Users) String(user_id int) string {
+	result := fmt.Sprintf("%s %s", users.list[user_id].FirstName, users.list[user_id].LastName)
+	if users.list[user_id].UserName != "" {
+		result += fmt.Sprintf(" (@%s)", users.list[user_id].UserName)
+	}
+	return result
 }
 
 // generate random code for authorize user
