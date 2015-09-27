@@ -180,11 +180,11 @@ LOOP:
 						for cmd, shell_cmd := range commands {
 							replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
 						}
-					}
-					if users.IsRoot(user_from.ID) {
-						replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram stat", "get stat about users")
-						if app_config.addExit {
-							replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram exit", "terminate bot")
+						if users.IsRoot(user_from.ID) {
+							replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram stat", "get stat about users")
+							if app_config.addExit {
+								replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram exit", "terminate bot")
+							}
 						}
 					}
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
