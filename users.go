@@ -95,10 +95,7 @@ func (users Users) IsAuthorized(tgbot_user tgbotapi.User) bool {
 func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	for _, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 {
-			_, err := bot.SendMessage(tgbotapi.NewMessage(user.PrivateChatID, message))
-			if err != nil {
-				log.Print("Bot send message error:", err)
-			}
+			sendMessageWithLogging(bot, user.PrivateChatID, message)
 		}
 	}
 }
@@ -117,7 +114,8 @@ func getRandomCode() string {
 	buffer := make([]byte, CODE_BYTES_LENGTH)
 	_, err := rand.Read(buffer)
 	if err != nil {
-		log.Fatal("Get code error:", err)
+		log.Print("Get code error: ", err)
+		return ""
 	}
 
 	return base64.URLEncoding.EncodeToString(buffer)

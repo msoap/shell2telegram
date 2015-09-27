@@ -31,7 +31,7 @@ type Config struct {
 	rootUsers  []string // users telegram-names who confirm new users through of it private chat
 }
 
-// ------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // get config
 func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
@@ -83,7 +83,15 @@ func getConfig() (commands Commands, app_config Config, err error) {
 	return commands, app_config, nil
 }
 
-// ------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+func sendMessageWithLogging(bot *tgbotapi.BotAPI, chat_id int, replay_msg string) {
+	_, err := bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+	if err != nil {
+		log.Print("Bot send message error: ", err)
+	}
+}
+
+// ----------------------------------------------------------------------------
 func main() {
 	commands, app_config, err := getConfig()
 	if err != nil {
@@ -190,10 +198,8 @@ LOOP:
 				}
 
 				if replay_msg != "" {
-					_, err := bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
-					if err != nil {
-						log.Print("Bot send message error:", err)
-					}
+					sendMessageWithLogging(bot, chat_id, replay_msg)
+
 					if go_exit {
 						break LOOP
 					}
