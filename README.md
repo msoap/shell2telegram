@@ -10,11 +10,14 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
     export TB_TOKEN=*******
     shell2telegram [options] /chat_command 'shell command' /chat_command2 'shell command2'
     options:
-        -add-exit         : add /exit command for terminate bot
-        -tb-token=<TOKEN> : set bot token (or set TB_TOKEN variable)
-        -timeout=<NN>     : set timeout for bot (default 60 sec)
+        -allow-users=<NAMES> : users telegram-names who allow chats with bot ("user1,user2")
+        -add-exit            : add /exit command for terminate bot
+        -tb-token=<TOKEN>    : set bot token (or set TB_TOKEN variable)
+        -timeout=<NN>        : set timeout for bot (default 60 sec)
         -version
         -help
+
+If not define "-allow-users" option - authorize users via secret code from console.
 
 Links
 -----
