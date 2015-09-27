@@ -47,12 +47,12 @@ func (users Users) IsValidCode(user_id int, code string) bool {
 
 // check code for user
 func (users Users) IsAuthorized(user_id int) bool {
-	allowExec := false
-	if _, ok := users[user_id]; ok {
-		allowExec = users[user_id].IsAuthorized
+	isAuthorized := false
+	if _, ok := users[user_id]; ok && users[user_id].IsAuthorized {
+		isAuthorized = true
 	}
 
-	return allowExec
+	return isAuthorized
 }
 
 // generate random code for authorize user
