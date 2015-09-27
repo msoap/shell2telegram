@@ -19,8 +19,9 @@ type Commands map[string]string
 
 // Config - config struct
 type Config struct {
-	token   string // bot token
-	addExit bool   // add /exit command
+	token      string // bot token
+	addExit    bool   // add /exit command
+	botTimeout int    // bot timeout
 }
 
 // ------------------------------------------------------------------
@@ -28,6 +29,7 @@ type Config struct {
 func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
+	flag.IntVar(&app_config.botTimeout, "timeout", 60, "bot timeout")
 
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
@@ -80,7 +82,7 @@ func main() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
-	ucfg.Timeout = 60
+	ucfg.Timeout = app_config.botTimeout
 	err = bot.UpdatesChan(ucfg)
 
 	go_exit := false
