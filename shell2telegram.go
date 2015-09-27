@@ -107,9 +107,9 @@ func main() {
 
 	log.Printf("Authorized on bot account: %s", bot.Self.UserName)
 
-	var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
-	ucfg.Timeout = app_config.botTimeout
-	err = bot.UpdatesChan(ucfg)
+	var tgbot_config tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
+	tgbot_config.Timeout = app_config.botTimeout
+	err = bot.UpdatesChan(tgbot_config)
 	if err != nil {
 		log.Fatal(err)
 	}
