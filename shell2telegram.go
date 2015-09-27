@@ -36,7 +36,7 @@ type Config struct {
 // get config
 func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
-	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
+	flag.BoolVar(&app_config.addExit, "add-exit", false, "add \"/shell2telegram exit\" command for terminate bot")
 	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "bot timeout")
 	flag.BoolVar(&app_config.allowAll, "allow-all", false, "allow all user (DANGEROUS!)")
 	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
@@ -160,12 +160,12 @@ LOOP:
 						for cmd, shell_cmd := range commands {
 							replay_msg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
 						}
-						if app_config.addExit {
-							replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
-						}
 					}
 					if users.IsRoot(user_from.ID) {
 						replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram stat", "get stat about users")
+						if app_config.addExit {
+							replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram exit", "terminate bot")
+						}
 					}
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
 
@@ -181,7 +181,12 @@ LOOP:
 						)
 					}
 
-				} else if allowExec && app_config.addExit && parts[0] == "/exit" {
+				} else if allowExec &&
+					users.IsRoot(user_from.ID) &&
+					app_config.addExit &&
+					parts[0] == "/shell2telegram" &&
+					len(parts) > 1 &&
+					parts[1] == "exit" {
 
 					replay_msg = "bye..."
 					go_exit = true
