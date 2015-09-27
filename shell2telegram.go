@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/Syfaro/telegram-bot-api"
 )
@@ -118,6 +119,7 @@ func main() {
 
 	go_exit := false
 	users := NewUsers(app_config)
+	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 
 LOOP:
 	for {
@@ -251,6 +253,9 @@ LOOP:
 					}
 				}
 			}
+
+		case <-vacuumTicker:
+			users.clearOldUsers()
 		}
 	}
 }

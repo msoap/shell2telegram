@@ -34,6 +34,9 @@ type Users struct {
 // length of random code in bytes
 const CODE_BYTES_LENGTH = 15
 
+// clear old users after 20 minutes after login
+const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
+
 // new Users object
 func NewUsers(appConfig Config) Users {
 	users := Users{
@@ -137,6 +140,17 @@ func (users Users) String(user_id int) string {
 		result += fmt.Sprintf(" (@%s)", users.list[user_id].UserName)
 	}
 	return result
+}
+
+// clear old users without login
+func (users Users) clearOldUsers() {
+	for id, user := range users.list {
+		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
+			time.Now().Sub(user.LastAccessTime).Seconds() > SECONDS_FOR_OLD_USERS_BEFORE_VACUUM {
+			log.Printf("Vacuum: %d, %s", id, users.String(id))
+			delete(users.list, id)
+		}
+	}
 }
 
 // generate random code for authorize user
