@@ -95,7 +95,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	log.Printf("Authorized on bot account: %s", bot.Self.UserName)
 
 	var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
 	ucfg.Timeout = app_config.botTimeout
