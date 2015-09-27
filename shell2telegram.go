@@ -16,6 +16,9 @@ import (
 // version
 const VERSION = "1.0"
 
+// bot default timeout
+const DEFAULT_BOT_TIMEOUT = 60
+
 // Command - one command type
 type Commands map[string]string
 
@@ -33,7 +36,7 @@ type Config struct {
 func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
-	flag.IntVar(&app_config.botTimeout, "timeout", 60, "bot timeout")
+	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "bot timeout")
 	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
 	rootUsers := flag.String("root-users", "", "users telegram-names who confirm new users through of it private chat (\"user1,user2\")")
 
