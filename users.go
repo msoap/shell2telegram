@@ -88,9 +88,7 @@ func (users Users) IsValidCode(user_id int, code string) bool {
 // check code for user
 func (users Users) IsAuthorized(tgbot_user tgbotapi.User) bool {
 	isAuthorized := false
-	if tgbot_user.UserName != "" && users.allowedUsers[tgbot_user.UserName] {
-		isAuthorized = true
-	} else if _, ok := users.list[tgbot_user.ID]; ok && users.list[tgbot_user.ID].IsAuthorized {
+	if _, ok := users.list[tgbot_user.ID]; ok && users.list[tgbot_user.ID].IsAuthorized {
 		isAuthorized = true
 	}
 
