@@ -24,12 +24,13 @@ type Commands map[string]string
 
 // Config - config struct
 type Config struct {
-	token      string   // bot token
-	addExit    bool     // add /exit command
-	botTimeout int      // bot timeout
-	allowUsers []string // users telegram-names who allow chats with bot
-	rootUsers  []string // users telegram-names who confirm new users through of it private chat
-	allowAll   bool     // allow all user (DANGEROUS!)
+	token       string   // bot token
+	addExit     bool     // add /exit command
+	botTimeout  int      // bot timeout
+	allowUsers  []string // users telegram-names who allow chats with bot
+	rootUsers   []string // users telegram-names who confirm new users through of it private chat
+	allowAll    bool     // allow all user (DANGEROUS!)
+	logCommands bool     // logging all commands
 }
 
 // ----------------------------------------------------------------------------
@@ -39,6 +40,7 @@ func getConfig() (commands Commands, app_config Config, err error) {
 	flag.BoolVar(&app_config.addExit, "add-exit", false, "add \"/shell2telegram exit\" command for terminate bot")
 	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "bot timeout")
 	flag.BoolVar(&app_config.allowAll, "allow-all", false, "allow all user (DANGEROUS!)")
+	flag.BoolVar(&app_config.logCommands, "log-commands", false, "logging all commands")
 	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
 	rootUsers := flag.String("root-users", "", "users telegram-names who confirm new users through of it private chat (\"user1,user2\")")
 
@@ -235,7 +237,7 @@ LOOP:
 
 					shell_out, err := os_exec_command.Output()
 					if err != nil {
-						log.Println("exec error: ", err)
+						log.Print("exec error: ", err)
 						replay_msg = fmt.Sprintf("exec error: %s", err)
 					} else {
 						replay_msg = string(shell_out)
@@ -244,6 +246,9 @@ LOOP:
 
 				if replay_msg != "" {
 					sendMessageWithLogging(bot, chat_id, replay_msg)
+					if app_config.logCommands {
+						log.Printf("%d @%s: %s", user_from.ID, user_from.UserName, telegram_update.Message.Text)
+					}
 
 					if go_exit {
 						break LOOP
