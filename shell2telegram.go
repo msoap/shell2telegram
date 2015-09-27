@@ -84,6 +84,9 @@ func main() {
 	var ucfg tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
 	ucfg.Timeout = app_config.botTimeout
 	err = bot.UpdatesChan(ucfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	go_exit := false
 	users := make(Users)
