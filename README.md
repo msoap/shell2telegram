@@ -20,6 +20,17 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
 
 If not define "-allow-users" option - authorize users via secret code from console.
 
+Examples
+--------
+
+    # system information
+    shell2telegram /top "top -l 1 | head -10" /date "date" /ps "ps aux | head -20"
+    
+    # sound volume control via telegram (Mac OS)
+    shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \
+                   /up   'osascript -e "set volume output volume (($(osascript -e "output volume of (get volume settings)")+10))"' \
+                   /down 'osascript -e "set volume output volume (($(osascript -e "output volume of (get volume settings)")-10))"'
+
 Links
 -----
 
