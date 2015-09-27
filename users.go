@@ -78,10 +78,6 @@ func (users Users) DoLogin(user_id int) {
 // check code for user
 func (users Users) IsValidCode(user_id int, code string) bool {
 	result := code != "" && code == users.list[user_id].AuthCode
-	if result {
-		users.list[user_id].IsAuthorized = true
-	}
-
 	return result
 }
 
