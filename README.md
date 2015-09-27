@@ -12,6 +12,7 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
     options:
         -allow-users=<NAMES> : users telegram-names who allow chats with bot ("user1,user2")
         -root-users=<NAMES>  : users telegram-names who confirm new users through of it private chat ("user1,user2")
+        -allow-all           : allow all user (DANGEROUS!)
         -add-exit            : add /exit command for terminate bot
         -tb-token=<TOKEN>    : set bot token (or set TB_TOKEN variable)
         -timeout=<NN>        : set timeout for bot (default 60 sec)

@@ -29,6 +29,7 @@ type Config struct {
 	botTimeout int      // bot timeout
 	allowUsers []string // users telegram-names who allow chats with bot
 	rootUsers  []string // users telegram-names who confirm new users through of it private chat
+	allowAll   bool     // allow all user (DANGEROUS!)
 }
 
 // ----------------------------------------------------------------------------
@@ -37,6 +38,7 @@ func getConfig() (commands Commands, app_config Config, err error) {
 	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&app_config.addExit, "add-exit", false, "add /exit command for terminate bot")
 	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "bot timeout")
+	flag.BoolVar(&app_config.allowAll, "allow-all", false, "allow all user (DANGEROUS!)")
 	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
 	rootUsers := flag.String("root-users", "", "users telegram-names who confirm new users through of it private chat (\"user1,user2\")")
 
@@ -130,7 +132,7 @@ LOOP:
 				user_from := telegram_update.Message.From
 
 				users.AddNew(user_from, telegram_update.Message.Chat)
-				allowExec := users.IsAuthorized(user_from.ID)
+				allowExec := app_config.allowAll || users.IsAuthorized(user_from.ID)
 
 				if parts[0] == "/auth" {
 
