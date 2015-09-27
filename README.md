@@ -3,7 +3,8 @@ shell2telegram
 
 Create Telegram bot from command-line
 
-Usage:
+Usage
+-----
 
 Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN var in shell
 
@@ -21,6 +22,8 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -help
 
 If not define -allow-users/-root-users options - authorize users via secret code from console or via chat with exists root users.
+
+All text after chat-command sent to STDIN of shell command.
 
 Predefined commands
 -------------------
