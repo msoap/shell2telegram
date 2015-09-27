@@ -60,7 +60,7 @@ func getConfig() (commands Commands, app_config Config, err error) {
 
 	if app_config.token == "" {
 		if app_config.token = os.Getenv("TB_TOKEN"); app_config.token == "" {
-			return commands, app_config, fmt.Errorf("TB_TOKEN env var not found. See https://core.telegram.org/bots#botfather for more information\n")
+			return commands, app_config, fmt.Errorf("TB_TOKEN environment var not found. See https://core.telegram.org/bots#botfather for more information\n")
 		}
 	}
 
