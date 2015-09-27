@@ -25,7 +25,7 @@ Examples
 --------
 
     # system information
-    shell2telegram /top "top -l 1 | head -10" /date "date" /ps "ps aux | head -20"
+    shell2telegram /top "top -l 1 | head -10" /date "date" /ps "ps aux -m | head -20"
     
     # sound volume control via telegram (Mac OS)
     shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \
