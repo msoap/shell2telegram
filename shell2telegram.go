@@ -133,7 +133,7 @@ LOOP:
 
 					} else if len(parts) > 1 {
 						if users.IsValidCode(user_from.ID, parts[1]) {
-							replay_msg = fmt.Sprintf("You (@%s) authorized.", user_from.UserName)
+							replay_msg = fmt.Sprintf("You (%s) authorized.", users.String(user_from.ID))
 							users.list[user_from.ID].IsAuthorized = true
 						} else {
 							replay_msg = fmt.Sprintf("Code is not valid.")
