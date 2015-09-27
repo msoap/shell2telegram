@@ -130,7 +130,7 @@ LOOP:
 				user_from := telegram_update.Message.From
 
 				users.AddNew(user_from, telegram_update.Message.Chat)
-				allowExec := users.IsAuthorized(user_from)
+				allowExec := users.IsAuthorized(user_from.ID)
 
 				if parts[0] == "/auth" {
 
@@ -162,11 +162,28 @@ LOOP:
 							replay_msg += fmt.Sprintf("%s - %s\n", "/exit", "terminate bot")
 						}
 					}
+					if users.IsRoot(user_from.ID) {
+						replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram stat", "get stat about users")
+					}
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
 
+				} else if allowExec && users.IsRoot(user_from.ID) && parts[0] == "/shell2telegram" && len(parts) > 1 && parts[1] == "stat" {
+
+					for user_id, user := range users.list {
+						replay_msg += fmt.Sprintf("%s: auth: %v, root: %v, count: %d, last: %v\n",
+							users.String(user_id),
+							user.IsAuthorized,
+							user.IsRoot,
+							user.Counter,
+							user.LastAccessTime.Format("2006-01-02 15:04:05"),
+						)
+					}
+
 				} else if allowExec && app_config.addExit && parts[0] == "/exit" {
+
 					replay_msg = "bye..."
 					go_exit = true
+
 				} else if cmd, found := commands[parts[0]]; allowExec && found {
 
 					shell, params := "sh", []string{"-c", cmd}

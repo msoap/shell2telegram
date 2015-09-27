@@ -5,19 +5,22 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/Syfaro/telegram-bot-api"
 )
 
 // One User
 type User struct {
-	UserName      string
-	FirstName     string
-	LastName      string
-	AuthCode      string
-	IsAuthorized  bool
-	IsRoot        bool
-	PrivateChatID int
+	UserName       string
+	FirstName      string
+	LastName       string
+	AuthCode       string
+	IsAuthorized   bool
+	IsRoot         bool
+	PrivateChatID  int
+	Counter        int
+	LastAccessTime time.Time
 }
 
 // Users in chat
@@ -67,6 +70,12 @@ func (users Users) AddNew(tgbot_user tgbotapi.User, tgbot_chat tgbotapi.UserOrGr
 			PrivateChatID: privateChatID,
 		}
 	}
+
+	// collect stat
+	users.list[tgbot_user.ID].LastAccessTime = time.Now()
+	if users.list[tgbot_user.ID].IsAuthorized {
+		users.list[tgbot_user.ID].Counter++
+	}
 }
 
 // generate code
@@ -81,14 +90,24 @@ func (users Users) IsValidCode(user_id int, code string) bool {
 	return result
 }
 
-// check code for user
-func (users Users) IsAuthorized(tgbot_user tgbotapi.User) bool {
+// check user is authorized
+func (users Users) IsAuthorized(user_id int) bool {
 	isAuthorized := false
-	if _, ok := users.list[tgbot_user.ID]; ok && users.list[tgbot_user.ID].IsAuthorized {
+	if _, ok := users.list[user_id]; ok && users.list[user_id].IsAuthorized {
 		isAuthorized = true
 	}
 
 	return isAuthorized
+}
+
+// check user is root
+func (users Users) IsRoot(user_id int) bool {
+	isRoot := false
+	if _, ok := users.list[user_id]; ok && users.list[user_id].IsRoot {
+		isRoot = true
+	}
+
+	return isRoot
 }
 
 // send message to all root users
