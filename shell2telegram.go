@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -164,6 +165,18 @@ LOOP:
 
 					os_exec_command := exec.Command(shell, params...)
 					os_exec_command.Stderr = os.Stderr
+
+					// write all arguments to STDIN
+					if len(parts) > 1 && parts[1] != "" {
+						stdin, err := os_exec_command.StdinPipe()
+						if err == nil {
+							io.WriteString(stdin, parts[1])
+							stdin.Close()
+						} else {
+							log.Print("get STDIN error: ", err)
+						}
+					}
+
 					shell_out, err := os_exec_command.Output()
 					if err != nil {
 						log.Println("exec error: ", err)
