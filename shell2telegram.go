@@ -198,6 +198,7 @@ LOOP:
 					}
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
 					replay_msg += fmt.Sprintf("%s - %s\n", "/authroot [code]", "authorize user as root")
+					replay_msg += fmt.Sprintf("%s - %s\n", "/shell2telegram version", "show version")
 
 				} else if users.IsRoot(user_from.ID) && messageCmd == "/shell2telegram" && messageArgs == "stat" {
 
@@ -215,6 +216,10 @@ LOOP:
 
 					replay_msg = "bye..."
 					go_exit = true
+
+				} else if messageCmd == "/shell2telegram" && messageArgs == "version" {
+
+					replay_msg = fmt.Sprintf("shell2telegram %s", VERSION)
 
 				} else if cmd, found := commands[messageCmd]; allowExec && found {
 

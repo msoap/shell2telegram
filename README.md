@@ -20,7 +20,19 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -version
         -help
 
-If not define "-allow-users" option - authorize users via secret code from console.
+If not define -allow-users/-root-users options - authorize users via secret code from console or via chat with exists root users.
+
+Predefined commands
+-------------------
+
+  * /help - list available commands
+  * /auth - begin authorize user
+  * /auth CODE - authorize with code from console or from exists root user
+  * /authroot - same for root user
+  * /authroot CODE - same for root user
+  * /shell2telegram stat - show users statistics (for roots only)
+  * /shell2telegram exit - terminate bot (for run with -add-exit and roots only)
+  * /shell2telegram version - show version
 
 Examples
 --------
