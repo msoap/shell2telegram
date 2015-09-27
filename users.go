@@ -99,7 +99,10 @@ func (users Users) IsAuthorized(tgbot_user tgbotapi.User) bool {
 func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	for _, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 {
-			bot.SendMessage(tgbotapi.NewMessage(user.PrivateChatID, message))
+			_, err := bot.SendMessage(tgbotapi.NewMessage(user.PrivateChatID, message))
+			if err != nil {
+				log.Print("Bot send message error:", err)
+			}
 		}
 	}
 }

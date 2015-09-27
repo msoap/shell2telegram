@@ -173,7 +173,10 @@ LOOP:
 				}
 
 				if replay_msg != "" {
-					bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+					_, err := bot.SendMessage(tgbotapi.NewMessage(chat_id, replay_msg))
+					if err != nil {
+						log.Print("Bot send message error:", err)
+					}
 					if go_exit {
 						break LOOP
 					}
