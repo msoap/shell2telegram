@@ -150,14 +150,7 @@ LOOP:
 					if len(messageText) == 1 {
 
 						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n" + messageCmd + " code"
-						users.DoLogin(user_from.ID, for_root)
-
-						var auth_code string
-						if for_root {
-							auth_code = users.list[user_from.ID].AuthCodeRoot
-						} else {
-							auth_code = users.list[user_from.ID].AuthCode
-						}
+						auth_code := users.DoLogin(user_from.ID, for_root)
 
 						root_role_str := ""
 						if for_root {

@@ -83,14 +83,16 @@ func (users Users) AddNew(tgbot_message tgbotapi.Message) {
 }
 
 // generate code
-func (users Users) DoLogin(user_id int, for_root bool) {
+func (users Users) DoLogin(user_id int, for_root bool) string {
+	code := getRandomCode()
 	if for_root {
 		users.list[user_id].IsRoot = false
-		users.list[user_id].AuthCodeRoot = getRandomCode()
+		users.list[user_id].AuthCodeRoot = code
 	} else {
 		users.list[user_id].IsAuthorized = false
-		users.list[user_id].AuthCode = getRandomCode()
+		users.list[user_id].AuthCode = code
 	}
+	return code
 }
 
 // check code for user
