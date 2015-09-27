@@ -1,8 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"log"
@@ -68,17 +66,6 @@ func getConfig() (commands Commands, app_config Config, err error) {
 }
 
 // ------------------------------------------------------------------
-func getRandomCode() string {
-	buffer := make([]byte, 15)
-	_, err := rand.Read(buffer)
-	if err != nil {
-		log.Fatal("Get code error:", err)
-	}
-
-	return base64.URLEncoding.EncodeToString(buffer)
-}
-
-// ------------------------------------------------------------------
 func main() {
 	commands, app_config, err := getConfig()
 	if err != nil {
@@ -112,31 +99,22 @@ LOOP:
 			if len(parts) > 0 && len(parts[0]) > 0 && parts[0][0] == '/' {
 
 				user_from := telegram_update.Message.From
-				allowExec := false
-				if _, ok := users[user_from.ID]; ok {
-					allowExec = users[user_from.ID].IsAuthorized
-				}
+				allowExec := users.IsAuthorized(user_from.ID)
 
 				if parts[0] == "/auth" {
 
-					if _, ok := users[user_from.ID]; !ok {
-						users[user_from.ID] = &User{
-							UserName:     user_from.UserName,
-							AuthCode:     "",
-							IsAuthorized: false,
-						}
-					}
+					users.AddNew(user_from.ID, user_from.UserName)
 
 					if len(parts) == 1 || parts[1] == "" {
 						replay_msg = "See code in terminal with shell2telegram and type:\n/auth code"
-						users[user_from.ID].IsAuthorized = false
-						users[user_from.ID].AuthCode = getRandomCode()
+						users.DoLogin(user_from.ID)
 						fmt.Printf("Code (for %s): %s\n", user_from.UserName, users[user_from.ID].AuthCode)
-					} else if len(parts) > 1 && parts[1] != "" && parts[1] == users[user_from.ID].AuthCode {
-						users[user_from.ID].IsAuthorized = true
-						replay_msg = fmt.Sprintf("You (%s) authorized.", user_from.UserName)
-					} else if len(parts) > 1 && parts[1] != "" && parts[1] != users[user_from.ID].AuthCode {
-						replay_msg = fmt.Sprintf("Code is not valid.")
+					} else if len(parts) > 1 {
+						if users.IsValidCode(user_from.ID, parts[1]) {
+							replay_msg = fmt.Sprintf("You (%s) authorized.", user_from.UserName)
+						} else {
+							replay_msg = fmt.Sprintf("Code is not valid.")
+						}
 					}
 
 				} else if parts[0] == "/help" {
