@@ -12,6 +12,7 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
     options:
         -add-exit         : add /exit command for terminate bot
         -tb-token=<TOKEN> : set bot token (or set TB_TOKEN variable)
+        -timeout=<NN>     : set timeout for bot (default 60 sec)
         -version
         -help
 
