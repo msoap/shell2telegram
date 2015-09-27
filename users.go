@@ -16,6 +16,7 @@ type User struct {
 	FirstName      string
 	LastName       string
 	AuthCode       string
+	AuthCodeRoot   string
 	IsAuthorized   bool
 	IsRoot         bool
 	PrivateChatID  int
@@ -79,14 +80,24 @@ func (users Users) AddNew(tgbot_user tgbotapi.User, tgbot_chat tgbotapi.UserOrGr
 }
 
 // generate code
-func (users Users) DoLogin(user_id int) {
-	users.list[user_id].IsAuthorized = false
-	users.list[user_id].AuthCode = getRandomCode()
+func (users Users) DoLogin(user_id int, for_root bool) {
+	if for_root {
+		users.list[user_id].IsRoot = false
+		users.list[user_id].AuthCodeRoot = getRandomCode()
+	} else {
+		users.list[user_id].IsAuthorized = false
+		users.list[user_id].AuthCode = getRandomCode()
+	}
 }
 
 // check code for user
-func (users Users) IsValidCode(user_id int, code string) bool {
-	result := code != "" && code == users.list[user_id].AuthCode
+func (users Users) IsValidCode(user_id int, code string, for_root bool) bool {
+	var result bool
+	if for_root {
+		result = code != "" && code == users.list[user_id].AuthCodeRoot
+	} else {
+		result = code != "" && code == users.list[user_id].AuthCode
+	}
 	return result
 }
 

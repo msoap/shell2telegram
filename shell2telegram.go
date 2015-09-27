@@ -134,21 +134,41 @@ LOOP:
 				users.AddNew(user_from, telegram_update.Message.Chat)
 				allowExec := app_config.allowAll || users.IsAuthorized(user_from.ID)
 
-				if parts[0] == "/auth" {
+				if parts[0] == "/auth" || parts[0] == "/authroot" {
+
+					for_root := parts[0] == "/authroot"
 
 					if len(parts) == 1 || parts[1] == "" {
 
-						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n/auth code"
-						users.DoLogin(user_from.ID)
+						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n" + parts[0] + " code"
+						users.DoLogin(user_from.ID, for_root)
 
-						secretCodeMsg := fmt.Sprintf("Request access for %s. Code: %s\n", users.String(user_from.ID), users.list[user_from.ID].AuthCode)
+						var auth_code string
+						if for_root {
+							auth_code = users.list[user_from.ID].AuthCodeRoot
+						} else {
+							auth_code = users.list[user_from.ID].AuthCode
+						}
+
+						root_role_str := ""
+						if for_root {
+							root_role_str = "root "
+						}
+						secretCodeMsg := fmt.Sprintf("Request %saccess for %s. Code: %s\n", root_role_str, users.String(user_from.ID), auth_code)
 						fmt.Print(secretCodeMsg)
 						users.broadcastForRoots(bot, secretCodeMsg)
 
 					} else if len(parts) > 1 {
-						if users.IsValidCode(user_from.ID, parts[1]) {
-							replay_msg = fmt.Sprintf("You (%s) authorized.", users.String(user_from.ID))
+						if users.IsValidCode(user_from.ID, parts[1], for_root) {
 							users.list[user_from.ID].IsAuthorized = true
+							if for_root {
+								users.list[user_from.ID].IsRoot = true
+								replay_msg = fmt.Sprintf("You (%s) authorized as root.", users.String(user_from.ID))
+								log.Print("root authorized: ", users.String(user_from.ID))
+							} else {
+								replay_msg = fmt.Sprintf("You (%s) authorized.", users.String(user_from.ID))
+								log.Print("authorized: ", users.String(user_from.ID))
+							}
 						} else {
 							replay_msg = fmt.Sprintf("Code is not valid.")
 						}
@@ -168,6 +188,7 @@ LOOP:
 						}
 					}
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
+					replay_msg += fmt.Sprintf("%s - %s\n", "/authroot [code]", "authorize user as root")
 
 				} else if allowExec && users.IsRoot(user_from.ID) && parts[0] == "/shell2telegram" && len(parts) > 1 && parts[1] == "stat" {
 
