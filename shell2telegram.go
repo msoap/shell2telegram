@@ -25,15 +25,6 @@ type Config struct {
 	addExit bool   // add /exit command
 }
 
-// Users in chat
-type User struct {
-	UserName     string
-	AuthCode     string
-	IsAuthorized bool
-}
-
-type Users map[int]*User
-
 // ------------------------------------------------------------------
 // get config
 func getConfig() (commands Commands, app_config Config, err error) {
