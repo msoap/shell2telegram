@@ -126,23 +126,28 @@ LOOP:
 
 			chat_id := telegram_update.Message.Chat.ID
 
-			parts := regexp.MustCompile(`\s+`).Split(telegram_update.Message.Text, 2)
+			messageText := regexp.MustCompile(`\s+`).Split(telegram_update.Message.Text, 2)
+			messageCmd, messageArgs := messageText[0], ""
+			if len(messageText) > 1 {
+				messageArgs = messageText[1]
+			}
+
 			replay_msg := ""
 
-			if len(parts) > 0 && len(parts[0]) > 0 && parts[0][0] == '/' {
+			if len(messageText) > 0 && len(messageCmd) > 0 && messageCmd[0] == '/' {
 
 				user_from := telegram_update.Message.From
 
 				users.AddNew(user_from, telegram_update.Message.Chat)
 				allowExec := app_config.allowAll || users.IsAuthorized(user_from.ID)
 
-				if parts[0] == "/auth" || parts[0] == "/authroot" {
+				if messageCmd == "/auth" || messageCmd == "/authroot" {
 
-					for_root := parts[0] == "/authroot"
+					for_root := messageCmd == "/authroot"
 
-					if len(parts) == 1 || parts[1] == "" {
+					if len(messageText) == 1 {
 
-						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n" + parts[0] + " code"
+						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n" + messageCmd + " code"
 						users.DoLogin(user_from.ID, for_root)
 
 						var auth_code string
@@ -160,8 +165,8 @@ LOOP:
 						fmt.Print(secretCodeMsg)
 						users.broadcastForRoots(bot, secretCodeMsg)
 
-					} else if len(parts) > 1 {
-						if users.IsValidCode(user_from.ID, parts[1], for_root) {
+					} else if len(messageText) > 1 {
+						if users.IsValidCode(user_from.ID, messageArgs, for_root) {
 							users.list[user_from.ID].IsAuthorized = true
 							if for_root {
 								users.list[user_from.ID].IsRoot = true
@@ -176,7 +181,7 @@ LOOP:
 						}
 					}
 
-				} else if parts[0] == "/help" {
+				} else if messageCmd == "/help" {
 
 					if allowExec {
 						for cmd, shell_cmd := range commands {
@@ -192,7 +197,7 @@ LOOP:
 					replay_msg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
 					replay_msg += fmt.Sprintf("%s - %s\n", "/authroot [code]", "authorize user as root")
 
-				} else if allowExec && users.IsRoot(user_from.ID) && parts[0] == "/shell2telegram" && len(parts) > 1 && parts[1] == "stat" {
+				} else if users.IsRoot(user_from.ID) && messageCmd == "/shell2telegram" && messageArgs == "stat" {
 
 					for user_id, user := range users.list {
 						replay_msg += fmt.Sprintf("%s: auth: %v, root: %v, count: %d, last: %v\n",
@@ -204,31 +209,22 @@ LOOP:
 						)
 					}
 
-				} else if allowExec &&
-					users.IsRoot(user_from.ID) &&
-					app_config.addExit &&
-					parts[0] == "/shell2telegram" &&
-					len(parts) > 1 &&
-					parts[1] == "exit" {
+				} else if users.IsRoot(user_from.ID) && app_config.addExit && messageCmd == "/shell2telegram" && messageArgs == "exit" {
 
 					replay_msg = "bye..."
 					go_exit = true
 
-				} else if cmd, found := commands[parts[0]]; allowExec && found {
+				} else if cmd, found := commands[messageCmd]; allowExec && found {
 
 					shell, params := "sh", []string{"-c", cmd}
-					if len(parts) > 1 {
-						params = append(params, parts[1])
-					}
-
 					os_exec_command := exec.Command(shell, params...)
 					os_exec_command.Stderr = os.Stderr
 
 					// write all arguments to STDIN
-					if len(parts) > 1 && parts[1] != "" {
+					if messageArgs != "" {
 						stdin, err := os_exec_command.StdinPipe()
 						if err == nil {
-							io.WriteString(stdin, parts[1])
+							io.WriteString(stdin, messageArgs)
 							stdin.Close()
 						} else {
 							log.Print("get STDIN error: ", err)
