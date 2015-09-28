@@ -37,13 +37,13 @@ type Config struct {
 // ----------------------------------------------------------------------------
 // get config
 func getConfig() (commands Commands, app_config Config, err error) {
-	flag.StringVar(&app_config.token, "tb-token", "", "set bot token (or set TB_TOKEN variable)")
-	flag.BoolVar(&app_config.addExit, "add-exit", false, "add \"/shell2telegram exit\" command for terminate bot")
-	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "bot timeout")
-	flag.BoolVar(&app_config.allowAll, "allow-all", false, "allow all user (DANGEROUS!)")
+	flag.StringVar(&app_config.token, "tb-token", "", "setting bot token (or set TB_TOKEN variable)")
+	flag.BoolVar(&app_config.addExit, "add-exit", false, "adding \"/shell2telegram exit\" command for terminate bot (for roots only)")
+	flag.IntVar(&app_config.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "setting timeout for bot")
+	flag.BoolVar(&app_config.allowAll, "allow-all", false, "allow all users (DANGEROUS!)")
 	flag.BoolVar(&app_config.logCommands, "log-commands", false, "logging all commands")
-	allowUsers := flag.String("allow-users", "", "users telegram-names who allow chats with bot (\"user1,user2\")")
-	rootUsers := flag.String("root-users", "", "users telegram-names who confirm new users through of it private chat (\"user1,user2\")")
+	allowUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
+	rootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
 
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
@@ -149,7 +149,7 @@ LOOP:
 
 					if len(messageText) == 1 {
 
-						replay_msg = "See code in terminal with shell2telegram or ack code from root user and type:\n" + messageCmd + " code"
+						replay_msg = "See code in terminal with shell2telegram or ask code from root user and type:\n" + messageCmd + " code"
 						auth_code := users.DoLogin(user_from.ID, for_root)
 
 						root_role_str := ""

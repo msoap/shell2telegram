@@ -3,6 +3,25 @@ shell2telegram
 
 Create Telegram bot from command-line
 
+Install
+-------
+
+MacOS:
+
+    brew tap msoap/tools
+    brew install shell2telegram
+    # update:
+    brew update; brew upgrade shell2telegram
+
+Or download binaries from: [releases](https://github.com/msoap/shell2telegram/releases) (OS X/Linux/Windows/RaspberryPi)
+
+Or build from source:
+
+    # install Go
+    # set $GOPATH if needed
+    go get -u github.com/msoap/shell2telegram
+    ln -s $GOPATH/bin/shell2telegram ~/bin/shell2telegram # or add $GOPATH/bin to $PATH
+
 Usage
 -----
 
@@ -11,28 +30,28 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
     export TB_TOKEN=*******
     shell2telegram [options] /chat_command 'shell command' /chat_command2 'shell command2'
     options:
-        -allow-users=<NAMES> : users telegram-names who allow chats with bot ("user1,user2")
-        -root-users=<NAMES>  : users telegram-names who confirm new users through of it private chat ("user1,user2")
-        -allow-all           : allow all user (DANGEROUS!)
-        -add-exit            : add "/shell2telegram exit" command for terminate bot (for root only)
+        -allow-users=<NAMES> : telegram users who are allowed to chat with the bot ("user1,user2")
+        -root-users=<NAMES>  : telegram users, who confirms new users in their private chat ("user1,user2")
+        -allow-all           : allow all users (DANGEROUS!)
+        -add-exit            : adding "/shell2telegram exit" command for terminate bot (for roots only)
         -log-commands        : logging all commands
-        -tb-token=<TOKEN>    : set bot token (or set TB_TOKEN variable)
-        -timeout=<NN>        : set timeout for bot (default 60 sec)
+        -tb-token=<TOKEN>    : setting bot token (or set TB_TOKEN variable)
+        -timeout=<NN>        : setting timeout for bot (default 60 sec)
         -version
         -help
 
 If not define -allow-users/-root-users options - authorize users via secret code from console or via chat with exists root users.
 
-All text after chat-command sent to STDIN of shell command.
+All text after chat-command will be sent to STDIN of shell command.
 
 Predefined commands
 -------------------
 
   * /help - list available commands
-  * /auth - begin authorize user
+  * /auth - begin authorize new user
   * /auth CODE - authorize with code from console or from exists root user
-  * /authroot - same for root user
-  * /authroot CODE - same for root user
+  * /authroot - same for new root user
+  * /authroot CODE - same for new root user
   * /shell2telegram stat - show users statistics (for roots only)
   * /shell2telegram exit - terminate bot (for run with -add-exit and roots only)
   * /shell2telegram version - show version
