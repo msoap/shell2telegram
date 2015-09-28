@@ -44,8 +44,8 @@ If not define -allow-users/-root-users options - authorize users via secret code
 
 All text after chat-command will be sent to STDIN of shell command.
 
-Predefined commands
--------------------
+Predefined bot commands
+-----------------------
 
   * /help - list available commands
   * /auth - begin authorize new user
@@ -60,7 +60,7 @@ Examples
 --------
 
     # system information
-    shell2telegram /top "top -l 1 | head -10" /date "date" /ps "ps aux -m | head -20"
+    shell2telegram /top 'top -l 1 | head -10' /date 'date' /ps 'ps aux -m | head -20'
     
     # sound volume control via telegram (Mac OS)
     shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \
