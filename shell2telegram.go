@@ -20,7 +20,7 @@ const VERSION = "1.0"
 // bot default timeout
 const DEFAULT_BOT_TIMEOUT = 60
 
-// Command - one command type
+// Commands - one command type
 type Commands map[string]string
 
 // Config - config struct
@@ -61,11 +61,11 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 
 	// setup log file
 	if len(*logFilename) > 0 {
-		fh_log, err := os.OpenFile(*logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+		fhLog, err := os.OpenFile(*logFilename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
 			log.Fatalf("error opening log file: %v", err)
 		}
-		log.SetOutput(fh_log)
+		log.SetOutput(fhLog)
 	}
 
 	// setup users and roots
@@ -101,8 +101,8 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 }
 
 // ----------------------------------------------------------------------------
-func sendMessageWithLogging(bot *tgbotapi.BotAPI, chatId int, replayMsg string) {
-	_, err := bot.SendMessage(tgbotapi.NewMessage(chatId, replayMsg))
+func sendMessageWithLogging(bot *tgbotapi.BotAPI, chatID int, replayMsg string) {
+	_, err := bot.SendMessage(tgbotapi.NewMessage(chatID, replayMsg))
 	if err != nil {
 		log.Print("Bot send message error: ", err)
 	}
@@ -122,7 +122,7 @@ func main() {
 
 	log.Printf("Authorized on bot account: %s", bot.Self.UserName)
 
-	var tgbotConfig tgbotapi.UpdateConfig = tgbotapi.NewUpdate(0)
+	tgbotConfig := tgbotapi.NewUpdate(0)
 	tgbotConfig.Timeout = appConfig.botTimeout
 	err = bot.UpdatesChan(tgbotConfig)
 	if err != nil {
@@ -197,8 +197,8 @@ LOOP:
 					}
 
 					if allowExec {
-						for cmd, shell_cmd := range commands {
-							helpMsg = append(helpMsg, cmd+" → "+shell_cmd)
+						for cmd, shellCmd := range commands {
+							helpMsg = append(helpMsg, cmd+" → "+shellCmd)
 						}
 						if users.IsRoot(userFrom.ID) {
 							helpMsg = append(helpMsg, "/shell2telegram stat → get stat about users")
@@ -214,9 +214,9 @@ LOOP:
 				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userFrom.ID):
 
-					for userId, user := range users.list {
+					for userID, user := range users.list {
 						replayMsg += fmt.Sprintf("%s: auth: %v, root: %v, count: %d, last: %v\n",
-							users.String(userId),
+							users.String(userID),
 							user.IsAuthorized,
 							user.IsRoot,
 							user.Counter,

@@ -10,7 +10,7 @@ import (
 	"github.com/Syfaro/telegram-bot-api"
 )
 
-// One User
+// User - one telegram user who interact with bot
 type User struct {
 	UserName       string
 	FirstName      string
@@ -37,7 +37,7 @@ const CODE_BYTES_LENGTH = 15
 // clear old users after 20 minutes after login
 const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
 
-// new Users object
+// NewUsers - create Users object
 func NewUsers(appConfig Config) Users {
 	users := Users{
 		list:         map[int]*User{},
@@ -55,78 +55,78 @@ func NewUsers(appConfig Config) Users {
 	return users
 }
 
-// add new user if not exists
-func (users Users) AddNew(tgbot_message tgbotapi.Message) {
+// AddNew - add new user if not exists
+func (users Users) AddNew(tgbotMessage tgbotapi.Message) {
 	privateChatID := 0
-	if !tgbot_message.IsGroup() {
-		privateChatID = tgbot_message.Chat.ID
+	if !tgbotMessage.IsGroup() {
+		privateChatID = tgbotMessage.Chat.ID
 	}
 
-	if _, ok := users.list[tgbot_message.From.ID]; ok && privateChatID > 0 {
-		users.list[tgbot_message.From.ID].PrivateChatID = privateChatID
+	if _, ok := users.list[tgbotMessage.From.ID]; ok && privateChatID > 0 {
+		users.list[tgbotMessage.From.ID].PrivateChatID = privateChatID
 	} else if !ok {
-		users.list[tgbot_message.From.ID] = &User{
-			UserName:      tgbot_message.From.UserName,
-			FirstName:     tgbot_message.From.FirstName,
-			LastName:      tgbot_message.From.LastName,
-			IsAuthorized:  users.allowedUsers[tgbot_message.From.UserName],
-			IsRoot:        users.rootUsers[tgbot_message.From.UserName],
+		users.list[tgbotMessage.From.ID] = &User{
+			UserName:      tgbotMessage.From.UserName,
+			FirstName:     tgbotMessage.From.FirstName,
+			LastName:      tgbotMessage.From.LastName,
+			IsAuthorized:  users.allowedUsers[tgbotMessage.From.UserName],
+			IsRoot:        users.rootUsers[tgbotMessage.From.UserName],
 			PrivateChatID: privateChatID,
 		}
 	}
 
 	// collect stat
-	users.list[tgbot_message.From.ID].LastAccessTime = time.Now()
-	if users.list[tgbot_message.From.ID].IsAuthorized {
-		users.list[tgbot_message.From.ID].Counter++
+	users.list[tgbotMessage.From.ID].LastAccessTime = time.Now()
+	if users.list[tgbotMessage.From.ID].IsAuthorized {
+		users.list[tgbotMessage.From.ID].Counter++
 	}
 }
 
-// generate code
-func (users Users) DoLogin(user_id int, for_root bool) string {
+// DoLogin - generate secret code
+func (users Users) DoLogin(userID int, forRoot bool) string {
 	code := getRandomCode()
-	if for_root {
-		users.list[user_id].IsRoot = false
-		users.list[user_id].AuthCodeRoot = code
+	if forRoot {
+		users.list[userID].IsRoot = false
+		users.list[userID].AuthCodeRoot = code
 	} else {
-		users.list[user_id].IsAuthorized = false
-		users.list[user_id].AuthCode = code
+		users.list[userID].IsAuthorized = false
+		users.list[userID].AuthCode = code
 	}
 	return code
 }
 
-// check code for user
-func (users Users) IsValidCode(user_id int, code string, for_root bool) bool {
+// IsValidCode - check secret code for user
+func (users Users) IsValidCode(userID int, code string, forRoot bool) bool {
 	var result bool
-	if for_root {
-		result = code != "" && code == users.list[user_id].AuthCodeRoot
+	if forRoot {
+		result = code != "" && code == users.list[userID].AuthCodeRoot
 	} else {
-		result = code != "" && code == users.list[user_id].AuthCode
+		result = code != "" && code == users.list[userID].AuthCode
 	}
 	return result
 }
 
-// check user is authorized
-func (users Users) IsAuthorized(user_id int) bool {
+// IsAuthorized - check user is authorized
+func (users Users) IsAuthorized(userID int) bool {
 	isAuthorized := false
-	if _, ok := users.list[user_id]; ok && users.list[user_id].IsAuthorized {
+	if _, ok := users.list[userID]; ok && users.list[userID].IsAuthorized {
 		isAuthorized = true
 	}
 
 	return isAuthorized
 }
 
-// check user is root
-func (users Users) IsRoot(user_id int) bool {
+// IsRoot - check user is root
+func (users Users) IsRoot(userID int) bool {
 	isRoot := false
-	if _, ok := users.list[user_id]; ok && users.list[user_id].IsRoot {
+	if _, ok := users.list[userID]; ok && users.list[userID].IsRoot {
 		isRoot = true
 	}
 
 	return isRoot
 }
 
-// send message to all root users
+// broadcastForRoots - send message to all root users
 func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	for _, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 {
@@ -135,16 +135,16 @@ func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	}
 }
 
-// Format user name
-func (users Users) String(user_id int) string {
-	result := fmt.Sprintf("%s %s", users.list[user_id].FirstName, users.list[user_id].LastName)
-	if users.list[user_id].UserName != "" {
-		result += fmt.Sprintf(" (@%s)", users.list[user_id].UserName)
+// String - format user name
+func (users Users) String(userID int) string {
+	result := fmt.Sprintf("%s %s", users.list[userID].FirstName, users.list[userID].LastName)
+	if users.list[userID].UserName != "" {
+		result += fmt.Sprintf(" (@%s)", users.list[userID].UserName)
 	}
 	return result
 }
 
-// clear old users without login
+// clearOldUsers - clear old users without login
 func (users Users) clearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
@@ -155,7 +155,7 @@ func (users Users) clearOldUsers() {
 	}
 }
 
-// generate random code for authorize user
+// getRandomCode - generate random code for authorize user
 func getRandomCode() string {
 	buffer := make([]byte, CODE_BYTES_LENGTH)
 	_, err := rand.Read(buffer)
