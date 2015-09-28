@@ -189,20 +189,25 @@ LOOP:
 
 				case messageCmd == "/help":
 
+					helpMsg := []string{
+						"/auth [code] → authorize user",
+						"/authroot [code] → authorize user as root",
+					}
+
 					if allowExec {
 						for cmd, shell_cmd := range commands {
-							replayMsg += fmt.Sprintf("%s - %s\n", cmd, shell_cmd)
+							helpMsg = append(helpMsg, cmd+" → "+shell_cmd)
 						}
 						if users.IsRoot(userFrom.ID) {
-							replayMsg += fmt.Sprintf("%s - %s\n", "/shell2telegram stat", "get stat about users")
+							helpMsg = append(helpMsg, "/shell2telegram stat → get stat about users")
 							if appConfig.addExit {
-								replayMsg += fmt.Sprintf("%s - %s\n", "/shell2telegram exit", "terminate bot")
+								helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
 							}
 						}
 					}
-					replayMsg += fmt.Sprintf("%s - %s\n", "/auth [code]", "authorize user")
-					replayMsg += fmt.Sprintf("%s - %s\n", "/authroot [code]", "authorize user as root")
-					replayMsg += fmt.Sprintf("%s - %s\n", "/shell2telegram version", "show version")
+
+					helpMsg = append(helpMsg, "/shell2telegram version → show version")
+					replayMsg = strings.Join(helpMsg, "\n")
 
 				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userFrom.ID):
 
