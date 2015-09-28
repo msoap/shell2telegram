@@ -152,8 +152,8 @@ LOOP:
 				users.AddNew(telegramUpdate.Message)
 				allowExec := appConfig.allowAll || users.IsAuthorized(userFrom.ID)
 
-				// commands ---
 				switch {
+				// commands .................................
 				case messageCmd == "/auth" || messageCmd == "/authroot":
 
 					forRoot := messageCmd == "/authroot"
@@ -187,6 +187,7 @@ LOOP:
 						}
 					}
 
+				// ..........................................
 				case messageCmd == "/help":
 
 					helpMsg := []string{
@@ -209,6 +210,7 @@ LOOP:
 					helpMsg = append(helpMsg, "/shell2telegram version → show version")
 					replayMsg = strings.Join(helpMsg, "\n")
 
+				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userFrom.ID):
 
 					for userId, user := range users.list {
@@ -221,15 +223,18 @@ LOOP:
 						)
 					}
 
+				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userFrom.ID) && appConfig.addExit:
 
 					replayMsg = "bye..."
 					doExit = true
 
+				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "version":
 
 					replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
 
+				// ..........................................
 				case allowExec:
 					if cmd, found := commands[messageCmd]; found {
 
