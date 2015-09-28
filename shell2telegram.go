@@ -209,7 +209,9 @@ LOOP:
 					}
 
 					helpMsg = append(helpMsg, "/shell2telegram version → show version")
-					replayMsg = strings.Join(helpMsg, "\n")
+					replayMsg = "This bot created with shell2telegram\n\n" +
+						"available commands:\n" +
+						strings.Join(helpMsg, "\n")
 
 				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userFrom.ID):
