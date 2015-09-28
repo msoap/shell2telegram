@@ -45,14 +45,15 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	allowUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	rootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
+	version := flag.Bool("version", false, "get version")
 
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	version := flag.Bool("version", false, "get version")
 	flag.Parse()
+
 	if *version {
 		fmt.Println(VERSION)
 		os.Exit(0)
