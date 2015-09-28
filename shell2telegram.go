@@ -26,10 +26,10 @@ type Commands map[string]string
 // Config - config struct
 type Config struct {
 	token       string   // bot token
-	addExit     bool     // add /exit command
+	addExit     bool     // adding /shell2telegram exit command
 	botTimeout  int      // bot timeout
-	allowUsers  []string // users telegram-names who allow chats with bot
-	rootUsers   []string // users telegram-names who confirm new users through of it private chat
+	allowUsers  []string // telegram users who are allowed to chat with the bot
+	rootUsers   []string // telegram users, who confirms new users in their private chat
 	allowAll    bool     // allow all user (DANGEROUS!)
 	logCommands bool     // logging all commands
 }
