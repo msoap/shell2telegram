@@ -3,10 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -148,128 +146,47 @@ LOOP:
 
 			if len(messageText) > 0 && len(messageCmd) > 0 && messageCmd[0] == '/' {
 
-				userFrom := telegramUpdate.Message.From
+				userID := telegramUpdate.Message.From.ID
 
 				users.AddNew(telegramUpdate.Message)
-				allowExec := appConfig.allowAll || users.IsAuthorized(userFrom.ID)
+				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
+				ctx := Ctx{
+					bot:         bot,
+					appConfig:   appConfig,
+					commands:    commands,
+					users:       users,
+					userID:      userID,
+					allowExec:   allowExec,
+					messageCmd:  messageCmd,
+					messageArgs: messageArgs,
+				}
 
 				switch {
 				// commands .................................
 				case messageCmd == "/auth" || messageCmd == "/authroot":
+					replayMsg = cmdAuth(ctx)
 
-					forRoot := messageCmd == "/authroot"
-
-					if len(messageText) == 1 {
-
-						replayMsg = "See code in terminal with shell2telegram or ask code from root user and type:\n" + messageCmd + " code"
-						authCode := users.DoLogin(userFrom.ID, forRoot)
-
-						rootRoleStr := ""
-						if forRoot {
-							rootRoleStr = "root "
-						}
-						secretCodeMsg := fmt.Sprintf("Request %saccess for %s. Code: %s\n", rootRoleStr, users.String(userFrom.ID), authCode)
-						fmt.Print(secretCodeMsg)
-						users.broadcastForRoots(bot, secretCodeMsg)
-
-					} else if len(messageText) > 1 {
-						if users.IsValidCode(userFrom.ID, messageArgs, forRoot) {
-							users.list[userFrom.ID].IsAuthorized = true
-							if forRoot {
-								users.list[userFrom.ID].IsRoot = true
-								replayMsg = fmt.Sprintf("You (%s) authorized as root.", users.String(userFrom.ID))
-								log.Print("root authorized: ", users.String(userFrom.ID))
-							} else {
-								replayMsg = fmt.Sprintf("You (%s) authorized.", users.String(userFrom.ID))
-								log.Print("authorized: ", users.String(userFrom.ID))
-							}
-						} else {
-							replayMsg = fmt.Sprintf("Code is not valid.")
-						}
-					}
-
-				// ..........................................
 				case messageCmd == "/help":
+					replayMsg = cmdHelp(ctx)
 
-					helpMsg := []string{
-						"/auth [code] → authorize user",
-						"/authroot [code] → authorize user as root",
-					}
+				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userID):
+					replayMsg = cmdShell2telegramStat(ctx)
 
-					if allowExec {
-						for cmd, shellCmd := range commands {
-							helpMsg = append(helpMsg, cmd+" → "+shellCmd)
-						}
-						if users.IsRoot(userFrom.ID) {
-							helpMsg = append(helpMsg, "/shell2telegram stat → get stat about users")
-							if appConfig.addExit {
-								helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
-							}
-						}
-					}
-
-					helpMsg = append(helpMsg, "/shell2telegram version → show version")
-					replayMsg = "This bot created with shell2telegram\n\n" +
-						"available commands:\n" +
-						strings.Join(helpMsg, "\n")
-
-				// ..........................................
-				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userFrom.ID):
-
-					for userID, user := range users.list {
-						replayMsg += fmt.Sprintf("%s: auth: %v, root: %v, count: %d, last: %v\n",
-							users.String(userID),
-							user.IsAuthorized,
-							user.IsRoot,
-							user.Counter,
-							user.LastAccessTime.Format("2006-01-02 15:04:05"),
-						)
-					}
-
-				// ..........................................
-				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userFrom.ID) && appConfig.addExit:
-
+				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userID) && appConfig.addExit:
 					replayMsg = "bye..."
 					doExit = true
 
-				// ..........................................
 				case messageCmd == "/shell2telegram" && messageArgs == "version":
-
 					replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
 
-				// ..........................................
 				case allowExec:
-					if cmd, found := commands[messageCmd]; found {
-
-						shell, params := "sh", []string{"-c", cmd}
-						osExecCommand := exec.Command(shell, params...)
-						osExecCommand.Stderr = os.Stderr
-
-						// write all arguments to STDIN
-						if messageArgs != "" {
-							stdin, err := osExecCommand.StdinPipe()
-							if err == nil {
-								io.WriteString(stdin, messageArgs)
-								stdin.Close()
-							} else {
-								log.Print("get STDIN error: ", err)
-							}
-						}
-
-						shellOut, err := osExecCommand.Output()
-						if err != nil {
-							log.Print("exec error: ", err)
-							replayMsg = fmt.Sprintf("exec error: %s", err)
-						} else {
-							replayMsg = string(shellOut)
-						}
-					}
+					replayMsg = cmdUser(ctx)
 				} // switch for commands
 
 				if replayMsg != "" {
 					sendMessageWithLogging(bot, telegramUpdate.Message.Chat.ID, replayMsg)
 					if appConfig.logCommands {
-						log.Printf("%d @%s: %s", userFrom.ID, userFrom.UserName, telegramUpdate.Message.Text)
+						log.Printf("%d @%s: %s", userID, telegramUpdate.Message.From.UserName, telegramUpdate.Message.Text)
 					}
 
 					if doExit {
