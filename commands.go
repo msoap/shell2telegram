@@ -14,16 +14,16 @@ import (
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
 	bot         *tgbotapi.BotAPI
-	appConfig   Config
-	commands    Commands
-	users       Users
-	userID      int
-	allowExec   bool
-	messageCmd  string
-	messageArgs string
+	appConfig   Config   // configuration
+	commands    Commands // all chat commands
+	users       Users    // all users
+	userID      int      // current user
+	allowExec   bool     // is user authorized
+	messageCmd  string   // command name
+	messageArgs string   // command arguments
 }
 
-// authorize users /auth and /authroot
+// /auth and /authroot - authorize users
 func cmdAuth(ctx Ctx) (replayMsg string) {
 	forRoot := ctx.messageCmd == "/authroot"
 
