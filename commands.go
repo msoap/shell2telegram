@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/Syfaro/telegram-bot-api"
@@ -71,7 +73,9 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			helpMsg = append(helpMsg, cmd+" → "+shellCmd)
 		}
 		if ctx.users.IsRoot(ctx.userID) {
-			helpMsg = append(helpMsg, "/shell2telegram stat → get stat about users")
+			helpMsg = append(helpMsg,
+				"/shell2telegram stat → get stat about users",
+				"/shell2telegram ban <user_id|username> → ban user")
 			if ctx.appConfig.addExit {
 				helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
 			}
@@ -89,13 +93,37 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 // /shell2telegram stat
 func cmdShell2telegramStat(ctx Ctx) (replayMsg string) {
 	for userID, user := range ctx.users.list {
-		replayMsg += fmt.Sprintf("%s: auth: %v, root: %v, count: %d, last: %v\n",
+		replayMsg += fmt.Sprintf("%s: id: %d, auth: %v, root: %v, count: %d, last: %v\n",
 			ctx.users.String(userID),
+			userID,
 			user.IsAuthorized,
 			user.IsRoot,
 			user.Counter,
 			user.LastAccessTime.Format("2006-01-02 15:04:05"),
 		)
+	}
+
+	return replayMsg
+}
+
+// /shell2telegram ban
+func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
+	_, userName := splitStringHalfBySpace(ctx.messageArgs)
+
+	if userName == "" {
+		return "Please get user_id or login"
+	}
+
+	userID, err := strconv.Atoi(userName)
+	if err != nil {
+		userName = regexp.MustCompile("@").ReplaceAllLiteralString(userName, "")
+		userID = ctx.users.getUserIDByName(userName)
+	}
+
+	if userID > 0 && ctx.users.banUser(userID) {
+		replayMsg = fmt.Sprintf("User %s banned", ctx.users.String(userID))
+	} else {
+		replayMsg = "User not found"
 	}
 
 	return replayMsg

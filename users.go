@@ -155,6 +155,30 @@ func (users Users) clearOldUsers() {
 	}
 }
 
+// getUserIDByName - find user by login
+func (users Users) getUserIDByName(userName string) int {
+	userID := 0
+	for id, user := range users.list {
+		if userName == user.UserName {
+			userID = id
+			break
+		}
+	}
+
+	return userID
+}
+
+// banUser - ban user by ID
+func (users Users) banUser(userID int) bool {
+	if _, ok := users.list[userID]; ok {
+		users.list[userID].IsAuthorized = false
+		users.list[userID].IsRoot = false
+		return true
+	}
+
+	return false
+}
+
 // getRandomCode - generate random code for authorize user
 func getRandomCode() string {
 	buffer := make([]byte, CODE_BYTES_LENGTH)

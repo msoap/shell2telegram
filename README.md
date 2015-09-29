@@ -53,6 +53,7 @@ Predefined bot commands
   * /authroot - same for new root user
   * /authroot CODE - same for new root user
   * /shell2telegram stat - show users statistics (for roots only)
+  * /shell2telegram ban user_id|username - ban user (for roots only)
   * /shell2telegram exit - terminate bot (for run with -add-exit and roots only)
   * /shell2telegram version - show version
 

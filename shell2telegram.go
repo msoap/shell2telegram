@@ -107,6 +107,18 @@ func sendMessageWithLogging(bot *tgbotapi.BotAPI, chatID int, replayMsg string) 
 }
 
 // ----------------------------------------------------------------------------
+// return 2 strings, second="" if string dont contain space
+func splitStringHalfBySpace(str string) (one, two string) {
+	array := regexp.MustCompile(`\s+`).Split(str, 2)
+	one, two = array[0], ""
+	if len(array) > 1 {
+		two = array[1]
+	}
+
+	return one, two
+}
+
+// ----------------------------------------------------------------------------
 func main() {
 	commands, appConfig, err := getConfig()
 	if err != nil {
@@ -136,15 +148,10 @@ LOOP:
 		select {
 		case telegramUpdate := <-bot.Updates:
 
-			messageText := regexp.MustCompile(`\s+`).Split(telegramUpdate.Message.Text, 2)
-			messageCmd, messageArgs := messageText[0], ""
-			if len(messageText) > 1 {
-				messageArgs = messageText[1]
-			}
-
+			messageCmd, messageArgs := splitStringHalfBySpace(telegramUpdate.Message.Text)
 			replayMsg := ""
 
-			if len(messageText) > 0 && len(messageCmd) > 0 && messageCmd[0] == '/' {
+			if len(messageCmd) > 0 && messageCmd[0] == '/' {
 
 				userID := telegramUpdate.Message.From.ID
 
@@ -171,6 +178,9 @@ LOOP:
 
 				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userID):
 					replayMsg = cmdShell2telegramStat(ctx)
+
+				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "ban") && users.IsRoot(userID):
+					replayMsg = cmdShell2telegramBan(ctx)
 
 				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userID) && appConfig.addExit:
 					replayMsg = "bye..."
