@@ -83,7 +83,13 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	}
 
 	helpMsg = append(helpMsg, "/shell2telegram version → show version")
-	replayMsg = "This bot created with shell2telegram\n\n" +
+
+	if ctx.appConfig.description != "" {
+		replayMsg = ctx.appConfig.description
+	} else {
+		replayMsg = "This bot created with shell2telegram"
+	}
+	replayMsg += "\n\n" +
 		"available commands:\n" +
 		strings.Join(helpMsg, "\n")
 

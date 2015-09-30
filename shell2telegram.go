@@ -30,6 +30,7 @@ type Config struct {
 	rootUsers   []string // telegram users, who confirms new users in their private chat
 	allowAll    bool     // allow all user (DANGEROUS!)
 	logCommands bool     // logging all commands
+	description string   // description of bot
 }
 
 // ----------------------------------------------------------------------------
@@ -40,6 +41,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.IntVar(&appConfig.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "setting timeout for bot")
 	flag.BoolVar(&appConfig.allowAll, "allow-all", false, "allow all users (DANGEROUS!)")
 	flag.BoolVar(&appConfig.logCommands, "log-commands", false, "logging all commands")
+	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	allowUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	rootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
