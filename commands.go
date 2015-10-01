@@ -117,7 +117,7 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 	_, userName := splitStringHalfBySpace(ctx.messageArgs)
 
 	if userName == "" {
-		return "Please get user_id or login"
+		return "Please set user_id or login"
 	}
 
 	userID, err := strconv.Atoi(userName)
