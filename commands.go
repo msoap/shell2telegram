@@ -63,19 +63,21 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 
 // /help
 func cmdHelp(ctx Ctx) (replayMsg string) {
-	helpMsg := []string{
-		"/auth [code] → authorize user",
-		"/authroot [code] → authorize user as root",
-	}
+	helpMsg := []string{}
 
 	if ctx.allowExec {
 		for cmd, shellCmd := range ctx.commands {
 			helpMsg = append(helpMsg, cmd+" → "+shellCmd)
 		}
+		helpMsg = append(helpMsg,
+			"/auth [code] → authorize user",
+			"/authroot [code] → authorize user as root",
+		)
 		if ctx.users.IsRoot(ctx.userID) {
 			helpMsg = append(helpMsg,
 				"/shell2telegram stat → get stat about users",
-				"/shell2telegram ban <user_id|username> → ban user")
+				"/shell2telegram ban <user_id|username> → ban user",
+			)
 			if ctx.appConfig.addExit {
 				helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
 			}
