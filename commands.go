@@ -44,9 +44,8 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 
 	} else {
 		if ctx.users.IsValidCode(ctx.userID, ctx.messageArgs, forRoot) {
-			ctx.users.list[ctx.userID].IsAuthorized = true
+			ctx.users.SetAuthorized(ctx.userID, forRoot)
 			if forRoot {
-				ctx.users.list[ctx.userID].IsRoot = true
 				replayMsg = fmt.Sprintf("You (%s) authorized as root.", ctx.users.String(ctx.userID))
 				log.Print("root authorized: ", ctx.users.String(ctx.userID))
 			} else {

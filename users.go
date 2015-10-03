@@ -95,6 +95,17 @@ func (users Users) DoLogin(userID int, forRoot bool) string {
 	return code
 }
 
+// SetAuthorized - set user authorized or authorized as root
+func (users Users) SetAuthorized(userID int, forRoot bool) {
+	users.list[userID].IsAuthorized = true
+	if forRoot {
+		users.list[userID].IsRoot = true
+		users.list[userID].AuthCodeRoot = ""
+	} else {
+		users.list[userID].AuthCode = ""
+	}
+}
+
 // IsValidCode - check secret code for user
 func (users Users) IsValidCode(userID int, code string, forRoot bool) bool {
 	var result bool
