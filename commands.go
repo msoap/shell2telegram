@@ -79,6 +79,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	if ctx.users.IsRoot(ctx.userID) {
 		helpMsg = append(helpMsg,
 			"/shell2telegram stat → get stat about users",
+			"/shell2telegram search <query> → search users by name/id",
 			"/shell2telegram ban <user_id|username> → ban user",
 		)
 		if ctx.appConfig.addExit {
@@ -102,15 +103,23 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 
 // /shell2telegram stat
 func cmdShell2telegramStat(ctx Ctx) (replayMsg string) {
-	for userID, user := range ctx.users.list {
-		replayMsg += fmt.Sprintf("%s: id: %d, auth: %v, root: %v, count: %d, last: %v\n",
-			ctx.users.String(userID),
-			userID,
-			user.IsAuthorized,
-			user.IsRoot,
-			user.Counter,
-			user.LastAccessTime.Format("2006-01-02 15:04:05"),
-		)
+	for userID := range ctx.users.list {
+		replayMsg += ctx.users.StringVerbose(userID) + "\n"
+	}
+
+	return replayMsg
+}
+
+// /shell2telegram search
+func cmdShell2telegramSearch(ctx Ctx) (replayMsg string) {
+	_, query := splitStringHalfBySpace(ctx.messageArgs)
+
+	if query == "" {
+		return "Please set query: /shell2telegram search <query>"
+	}
+
+	for _, userID := range ctx.users.Search(query) {
+		replayMsg += ctx.users.StringVerbose(userID) + "\n"
 	}
 
 	return replayMsg
@@ -121,7 +130,7 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 	_, userName := splitStringHalfBySpace(ctx.messageArgs)
 
 	if userName == "" {
-		return "Please set user_id or login"
+		return "Please set user_id or login: /shell2telegram ban <user_id|@username>"
 	}
 
 	userID, err := strconv.Atoi(userName)

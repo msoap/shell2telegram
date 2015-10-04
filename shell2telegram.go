@@ -194,6 +194,9 @@ LOOP:
 				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "ban") && users.IsRoot(userID):
 					replayMsg = cmdShell2telegramBan(ctx)
 
+				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "search") && users.IsRoot(userID):
+					replayMsg = cmdShell2telegramSearch(ctx)
+
 				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userID) && appConfig.addExit:
 					replayMsg = "bye..."
 					doExit = true

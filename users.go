@@ -5,6 +5,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Syfaro/telegram-bot-api"
@@ -155,6 +158,20 @@ func (users Users) String(userID int) string {
 	return result
 }
 
+// StringVerbose - format user name with all fields
+func (users Users) StringVerbose(userID int) string {
+	user := users.list[userID]
+	result := fmt.Sprintf("%s: id: %d, auth: %v, root: %v, count: %d, last: %v",
+		users.String(userID),
+		userID,
+		user.IsAuthorized,
+		user.IsRoot,
+		user.Counter,
+		user.LastAccessTime.Format("2006-01-02 15:04:05"),
+	)
+	return result
+}
+
 // clearOldUsers - clear old users without login
 func (users Users) clearOldUsers() {
 	for id, user := range users.list {
@@ -188,6 +205,24 @@ func (users Users) banUser(userID int) bool {
 	}
 
 	return false
+}
+
+// Search - search users
+func (users Users) Search(query string) (result []int) {
+	queryUserID, _ := strconv.Atoi(query)
+	query = strings.ToLower(query)
+	queryAsLogin := regexp.MustCompile("@").ReplaceAllLiteralString(query, "")
+
+	for userID, user := range users.list {
+		if queryUserID == userID ||
+			strings.Contains(strings.ToLower(user.UserName), queryAsLogin) ||
+			strings.Contains(strings.ToLower(user.FirstName), query) ||
+			strings.Contains(strings.ToLower(user.LastName), query) {
+			result = append(result, userID)
+		}
+	}
+
+	return result
 }
 
 // getRandomCode - generate random code for authorize user
