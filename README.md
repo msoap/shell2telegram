@@ -43,7 +43,9 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
 
 If not define -allow-users/-root-users options - authorize users via secret code from console or via chat with exists root users.
 
-All text after chat-command will be sent to STDIN of shell command.
+All text after /chat_command will be sent to STDIN of shell command.
+
+If chat command is /:plain_text - get user message without any /command (for private chats only)
 
 Predefined bot commands
 -----------------------

@@ -48,7 +48,12 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	version := flag.Bool("version", false, "get version")
 
 	flag.Usage = func() {
-		fmt.Printf("usage: %s [options] /chat_command \"shell command\" /chat_command2 \"shell command2\"\n", os.Args[0])
+		fmt.Printf("usage: %s [options] %s\n%s\n%s\n\noptions:\n",
+			os.Args[0],
+			`/chat_command "shell command" /chat_command2 "shell command2"`,
+			"All text after /chat_command will be sent to STDIN of shell command.",
+			"If chat command is /:plain_text - get user message without any /command (for private chats only)",
+		)
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
@@ -142,6 +147,10 @@ func main() {
 	}
 
 	doExit := false
+	allowPlainText := false
+	if _, ok := commands["/:plain_text"]; ok {
+		allowPlainText = true
+	}
 	users := NewUsers(appConfig)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 
@@ -153,7 +162,7 @@ LOOP:
 			messageCmd, messageArgs := splitStringHalfBySpace(telegramUpdate.Message.Text)
 			replayMsg := ""
 
-			if len(messageCmd) > 0 && messageCmd[0] == '/' {
+			if len(messageCmd) > 0 && (messageCmd[0] == '/' || allowPlainText) {
 
 				userID := telegramUpdate.Message.From.ID
 
@@ -166,6 +175,7 @@ LOOP:
 					users:       users,
 					userID:      userID,
 					allowExec:   allowExec,
+					allMessage:  telegramUpdate.Message.Text,
 					messageCmd:  messageCmd,
 					messageArgs: messageArgs,
 				}
@@ -191,8 +201,12 @@ LOOP:
 				case messageCmd == "/shell2telegram" && messageArgs == "version":
 					replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
 
+				case allowExec && allowPlainText && messageCmd[0] != '/':
+					replayMsg = cmdPlainText(ctx)
+
 				case allowExec:
 					replayMsg = cmdUser(ctx)
+
 				} // switch for commands
 
 				if replayMsg != "" {

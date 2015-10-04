@@ -21,6 +21,7 @@ type Ctx struct {
 	users       Users    // all users
 	userID      int      // current user
 	allowExec   bool     // is user authorized
+	allMessage  string   // user message completely
 	messageCmd  string   // command name
 	messageArgs string   // command arguments
 }
@@ -139,30 +140,45 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 // all commands from command-line
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
-
-		shell, params := "sh", []string{"-c", cmd}
-		osExecCommand := exec.Command(shell, params...)
-		osExecCommand.Stderr = os.Stderr
-
-		// write all arguments to STDIN
-		if ctx.messageArgs != "" {
-			stdin, err := osExecCommand.StdinPipe()
-			if err == nil {
-				io.WriteString(stdin, ctx.messageArgs)
-				stdin.Close()
-			} else {
-				log.Print("get STDIN error: ", err)
-			}
-		}
-
-		shellOut, err := osExecCommand.Output()
-		if err != nil {
-			log.Print("exec error: ", err)
-			replayMsg = fmt.Sprintf("exec error: %s", err)
-		} else {
-			replayMsg = string(shellOut)
-		}
+		replayMsg = _execShell(cmd, ctx.messageArgs)
 	}
 
 	return replayMsg
+}
+
+// plain text handler
+func cmdPlainText(ctx Ctx) (replayMsg string) {
+	if cmd, found := ctx.commands["/:plain_text"]; found {
+		replayMsg = _execShell(cmd, ctx.allMessage)
+	}
+
+	return replayMsg
+}
+
+// internal function for exec shell commands
+func _execShell(shellCmd, input string) (result string) {
+	shell, params := "sh", []string{"-c", shellCmd}
+	osExecCommand := exec.Command(shell, params...)
+	osExecCommand.Stderr = os.Stderr
+
+	// write user input to STDIN
+	if input != "" {
+		stdin, err := osExecCommand.StdinPipe()
+		if err == nil {
+			io.WriteString(stdin, input)
+			stdin.Close()
+		} else {
+			log.Print("get STDIN error: ", err)
+		}
+	}
+
+	shellOut, err := osExecCommand.Output()
+	if err != nil {
+		log.Print("exec error: ", err)
+		result = fmt.Sprintf("exec error: %s", err)
+	} else {
+		result = string(shellOut)
+	}
+
+	return result
 }
