@@ -4,5 +4,8 @@ run:
 build:
 	go build
 
+test:
+	go test
+
 update-from-github:
 	go get -u github.com/msoap/shell2telegram
