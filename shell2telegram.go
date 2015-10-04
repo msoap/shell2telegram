@@ -225,7 +225,7 @@ LOOP:
 			}
 
 		case <-vacuumTicker:
-			users.clearOldUsers()
+			users.ClearOldUsers()
 		}
 	}
 }

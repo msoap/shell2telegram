@@ -41,7 +41,7 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 		}
 		secretCodeMsg := fmt.Sprintf("Request %saccess for %s. Code: %s\n", rootRoleStr, ctx.users.String(ctx.userID), authCode)
 		fmt.Print(secretCodeMsg)
-		ctx.users.broadcastForRoots(ctx.bot, secretCodeMsg)
+		ctx.users.BroadcastForRoots(ctx.bot, secretCodeMsg)
 
 	} else {
 		if ctx.users.IsValidCode(ctx.userID, ctx.messageArgs, forRoot) {
@@ -136,10 +136,10 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 	userID, err := strconv.Atoi(userName)
 	if err != nil {
 		userName = regexp.MustCompile("@").ReplaceAllLiteralString(userName, "")
-		userID = ctx.users.getUserIDByName(userName)
+		userID = ctx.users.GetUserIDByName(userName)
 	}
 
-	if userID > 0 && ctx.users.banUser(userID) {
+	if userID > 0 && ctx.users.BanUser(userID) {
 		replayMsg = fmt.Sprintf("User %s banned", ctx.users.String(userID))
 	} else {
 		replayMsg = "User not found"

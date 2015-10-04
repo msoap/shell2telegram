@@ -141,7 +141,7 @@ func (users Users) IsRoot(userID int) bool {
 }
 
 // broadcastForRoots - send message to all root users
-func (users Users) broadcastForRoots(bot *tgbotapi.BotAPI, message string) {
+func (users Users) BroadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	for _, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 {
 			sendMessageWithLogging(bot, user.PrivateChatID, message)
@@ -173,7 +173,7 @@ func (users Users) StringVerbose(userID int) string {
 }
 
 // clearOldUsers - clear old users without login
-func (users Users) clearOldUsers() {
+func (users Users) ClearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
 			time.Now().Sub(user.LastAccessTime).Seconds() > SECONDS_FOR_OLD_USERS_BEFORE_VACUUM {
@@ -184,7 +184,7 @@ func (users Users) clearOldUsers() {
 }
 
 // getUserIDByName - find user by login
-func (users Users) getUserIDByName(userName string) int {
+func (users Users) GetUserIDByName(userName string) int {
 	userID := 0
 	for id, user := range users.list {
 		if userName == user.UserName {
@@ -197,7 +197,7 @@ func (users Users) getUserIDByName(userName string) int {
 }
 
 // banUser - ban user by ID
-func (users Users) banUser(userID int) bool {
+func (users Users) BanUser(userID int) bool {
 	if _, ok := users.list[userID]; ok {
 		users.list[userID].IsAuthorized = false
 		users.list[userID].IsRoot = false
