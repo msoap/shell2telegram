@@ -82,13 +82,12 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			"/shell2telegram search <query> → search users by name/id",
 			"/shell2telegram ban <user_id|username> → ban user",
 			"/shell2telegram desc <bot description> → set bot description",
+			"/shell2telegram version → show version",
 		)
 		if ctx.appConfig.addExit {
 			helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
 		}
 	}
-
-	helpMsg = append(helpMsg, "/shell2telegram version → show version")
 
 	if ctx.appConfig.description != "" {
 		replayMsg = ctx.appConfig.description
@@ -113,7 +112,7 @@ func cmdShell2telegramStat(ctx Ctx) (replayMsg string) {
 
 // /shell2telegram search
 func cmdShell2telegramSearch(ctx Ctx) (replayMsg string) {
-	_, query := splitStringHalfBySpace(ctx.messageArgs)
+	query := ctx.messageArgs
 
 	if query == "" {
 		return "Please set query: /shell2telegram search <query>"
@@ -128,7 +127,7 @@ func cmdShell2telegramSearch(ctx Ctx) (replayMsg string) {
 
 // /shell2telegram ban
 func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
-	_, userName := splitStringHalfBySpace(ctx.messageArgs)
+	userName := ctx.messageArgs
 
 	if userName == "" {
 		return "Please set user_id or login: /shell2telegram ban <user_id|@username>"
@@ -169,7 +168,7 @@ func cmdPlainText(ctx Ctx) (replayMsg string) {
 
 // set bot description
 func cmdShell2telegramDesc(ctx Ctx) (replayMsg string) {
-	_, description := splitStringHalfBySpace(ctx.messageArgs)
+	description := ctx.messageArgs
 
 	if description == "" {
 		return "Please set description: /shell2telegram desc <bot description>"

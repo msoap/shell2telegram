@@ -168,6 +168,17 @@ LOOP:
 
 				users.AddNew(telegramUpdate.Message)
 				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
+
+				messageSubCmd := "" // for /shell2telegram commands
+				if messageCmd == "/shell2telegram" {
+					// all /shell2telegram commands available for root only
+					if !users.IsRoot(userID) {
+						continue LOOP
+					}
+
+					messageSubCmd, messageArgs = splitStringHalfBySpace(messageArgs)
+				}
+
 				ctx := Ctx{
 					bot:         bot,
 					appConfig:   &appConfig,
@@ -188,23 +199,23 @@ LOOP:
 				case messageCmd == "/help":
 					replayMsg = cmdHelp(ctx)
 
-				case messageCmd == "/shell2telegram" && messageArgs == "stat" && users.IsRoot(userID):
+				case messageCmd == "/shell2telegram" && messageSubCmd == "stat":
 					replayMsg = cmdShell2telegramStat(ctx)
 
-				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "ban") && users.IsRoot(userID):
+				case messageCmd == "/shell2telegram" && messageSubCmd == "ban":
 					replayMsg = cmdShell2telegramBan(ctx)
 
-				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "search") && users.IsRoot(userID):
+				case messageCmd == "/shell2telegram" && messageSubCmd == "search":
 					replayMsg = cmdShell2telegramSearch(ctx)
 
-				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "desc") && users.IsRoot(userID):
+				case messageCmd == "/shell2telegram" && messageSubCmd == "desc":
 					replayMsg = cmdShell2telegramDesc(ctx)
 
-				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userID) && appConfig.addExit:
+				case messageCmd == "/shell2telegram" && messageSubCmd == "exit" && appConfig.addExit:
 					replayMsg = "bye..."
 					doExit = true
 
-				case messageCmd == "/shell2telegram" && messageArgs == "version":
+				case messageCmd == "/shell2telegram" && messageSubCmd == "version":
 					replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
 
 				case allowExec && allowPlainText && messageCmd[0] != '/':
