@@ -170,7 +170,7 @@ LOOP:
 				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
 				ctx := Ctx{
 					bot:         bot,
-					appConfig:   appConfig,
+					appConfig:   &appConfig,
 					commands:    commands,
 					users:       users,
 					userID:      userID,
@@ -196,6 +196,9 @@ LOOP:
 
 				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "search") && users.IsRoot(userID):
 					replayMsg = cmdShell2telegramSearch(ctx)
+
+				case messageCmd == "/shell2telegram" && strings.HasPrefix(messageArgs, "desc") && users.IsRoot(userID):
+					replayMsg = cmdShell2telegramDesc(ctx)
 
 				case messageCmd == "/shell2telegram" && messageArgs == "exit" && users.IsRoot(userID) && appConfig.addExit:
 					replayMsg = "bye..."

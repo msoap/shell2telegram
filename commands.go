@@ -16,7 +16,7 @@ import (
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
 	bot         *tgbotapi.BotAPI
-	appConfig   Config   // configuration
+	appConfig   *Config  // configuration
 	commands    Commands // all chat commands
 	users       Users    // all users
 	userID      int      // current user
@@ -81,6 +81,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			"/shell2telegram stat → get stat about users",
 			"/shell2telegram search <query> → search users by name/id",
 			"/shell2telegram ban <user_id|username> → ban user",
+			"/shell2telegram desc <bot description> → set bot description",
 		)
 		if ctx.appConfig.addExit {
 			helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
@@ -162,6 +163,20 @@ func cmdPlainText(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands["/:plain_text"]; found {
 		replayMsg = _execShell(cmd, ctx.allMessage)
 	}
+
+	return replayMsg
+}
+
+// set bot description
+func cmdShell2telegramDesc(ctx Ctx) (replayMsg string) {
+	_, description := splitStringHalfBySpace(ctx.messageArgs)
+
+	if description == "" {
+		return "Please set description: /shell2telegram desc <bot description>"
+	}
+
+	ctx.appConfig.description = description
+	replayMsg = "Bot description set to: " + description
 
 	return replayMsg
 }

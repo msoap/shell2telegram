@@ -63,6 +63,7 @@ for root users only:
   * /shell2telegram search query - search users by name/id
   * /shell2telegram ban user_id|username - ban user
   * /shell2telegram exit - terminate bot (for run with -add-exit)
+  * /shell2telegram desc "description" - set bot description
 
 Examples
 --------
