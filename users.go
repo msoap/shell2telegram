@@ -201,6 +201,10 @@ func (users Users) BanUser(userID int) bool {
 	if _, ok := users.list[userID]; ok {
 		users.list[userID].IsAuthorized = false
 		users.list[userID].IsRoot = false
+		if users.list[userID].UserName != "" {
+			delete(users.predefinedAllowedUsers, users.list[userID].UserName)
+			delete(users.predefinedRootUsers, users.list[userID].UserName)
+		}
 		return true
 	}
 
