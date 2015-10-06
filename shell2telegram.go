@@ -23,14 +23,14 @@ type Commands map[string]string
 
 // Config - config struct
 type Config struct {
-	token       string   // bot token
-	addExit     bool     // adding /shell2telegram exit command
-	botTimeout  int      // bot timeout
-	allowUsers  []string // telegram users who are allowed to chat with the bot
-	rootUsers   []string // telegram users, who confirms new users in their private chat
-	allowAll    bool     // allow all user (DANGEROUS!)
-	logCommands bool     // logging all commands
-	description string   // description of bot
+	token                  string   // bot token
+	addExit                bool     // adding /shell2telegram exit command
+	botTimeout             int      // bot timeout
+	predefinedAllowedUsers []string // telegram users who are allowed to chat with the bot
+	predefinedRootUsers    []string // telegram users, who confirms new users in their private chat
+	allowAll               bool     // allow all user (DANGEROUS!)
+	logCommands            bool     // logging all commands
+	description            string   // description of bot
 }
 
 // ----------------------------------------------------------------------------
@@ -43,8 +43,8 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.BoolVar(&appConfig.logCommands, "log-commands", false, "logging all commands")
 	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
-	allowUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
-	rootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
+	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
+	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
 	version := flag.Bool("version", false, "get version")
 
 	flag.Usage = func() {
@@ -74,11 +74,11 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	}
 
 	// setup users and roots
-	if *allowUsers != "" {
-		appConfig.allowUsers = strings.Split(*allowUsers, ",")
+	if *predefinedAllowedUsers != "" {
+		appConfig.predefinedAllowedUsers = strings.Split(*predefinedAllowedUsers, ",")
 	}
-	if *rootUsers != "" {
-		appConfig.rootUsers = strings.Split(*rootUsers, ",")
+	if *predefinedRootUsers != "" {
+		appConfig.predefinedRootUsers = strings.Split(*predefinedRootUsers, ",")
 	}
 
 	commands = Commands{}

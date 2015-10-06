@@ -29,9 +29,9 @@ type User struct {
 
 // Users in chat
 type Users struct {
-	list         map[int]*User
-	allowedUsers map[string]bool
-	rootUsers    map[string]bool
+	list                   map[int]*User
+	predefinedAllowedUsers map[string]bool
+	predefinedRootUsers    map[string]bool
 }
 
 // length of random code in bytes
@@ -43,17 +43,17 @@ const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
 // NewUsers - create Users object
 func NewUsers(appConfig Config) Users {
 	users := Users{
-		list:         map[int]*User{},
-		allowedUsers: map[string]bool{},
-		rootUsers:    map[string]bool{},
+		list: map[int]*User{},
+		predefinedAllowedUsers: map[string]bool{},
+		predefinedRootUsers:    map[string]bool{},
 	}
 
-	for _, name := range appConfig.allowUsers {
-		users.allowedUsers[name] = true
+	for _, name := range appConfig.predefinedAllowedUsers {
+		users.predefinedAllowedUsers[name] = true
 	}
-	for _, name := range appConfig.rootUsers {
-		users.allowedUsers[name] = true
-		users.rootUsers[name] = true
+	for _, name := range appConfig.predefinedRootUsers {
+		users.predefinedAllowedUsers[name] = true
+		users.predefinedRootUsers[name] = true
 	}
 	return users
 }
@@ -72,8 +72,8 @@ func (users Users) AddNew(tgbotMessage tgbotapi.Message) {
 			UserName:      tgbotMessage.From.UserName,
 			FirstName:     tgbotMessage.From.FirstName,
 			LastName:      tgbotMessage.From.LastName,
-			IsAuthorized:  users.allowedUsers[tgbotMessage.From.UserName],
-			IsRoot:        users.rootUsers[tgbotMessage.From.UserName],
+			IsAuthorized:  users.predefinedAllowedUsers[tgbotMessage.From.UserName],
+			IsRoot:        users.predefinedRootUsers[tgbotMessage.From.UserName],
 			PrivateChatID: privateChatID,
 		}
 	}
