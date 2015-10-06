@@ -211,6 +211,9 @@ LOOP:
 				case messageCmd == "/shell2telegram" && messageSubCmd == "desc":
 					replayMsg = cmdShell2telegramDesc(ctx)
 
+				case messageCmd == "/shell2telegram" && messageSubCmd == "rm":
+					replayMsg = cmdShell2telegramRm(ctx)
+
 				case messageCmd == "/shell2telegram" && messageSubCmd == "exit" && appConfig.addExit:
 					replayMsg = "bye..."
 					doExit = true

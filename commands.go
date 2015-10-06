@@ -82,6 +82,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			"/shell2telegram search <query> → search users by name/id",
 			"/shell2telegram ban <user_id|username> → ban user",
 			"/shell2telegram desc <bot description> → set bot description",
+			"/shell2telegram rm </command> → delete command",
 			"/shell2telegram version → show version",
 		)
 		if ctx.appConfig.addExit {
@@ -176,6 +177,23 @@ func cmdShell2telegramDesc(ctx Ctx) (replayMsg string) {
 
 	ctx.appConfig.description = description
 	replayMsg = "Bot description set to: " + description
+
+	return replayMsg
+}
+
+// /shell2telegram rm "/command" - delete command
+func cmdShell2telegramRm(ctx Ctx) (replayMsg string) {
+	command_name := ctx.messageArgs
+
+	if command_name == "" {
+		return "Please set command for delete: /shell2telegram rm </command>"
+	}
+	if _, ok := ctx.commands[command_name]; ok {
+		delete(ctx.commands, command_name)
+		replayMsg = "Deleted command: " + command_name
+	} else {
+		replayMsg = fmt.Sprintf("Command %s not found", command_name)
+	}
 
 	return replayMsg
 }
