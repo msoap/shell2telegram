@@ -148,7 +148,7 @@ func main() {
 
 	users := NewUsers(appConfig)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
-	exitChan := make(chan struct{})
+	exitSignal := make(chan struct{})
 
 	// all /shell2telegram sub-commands handlers
 	internalCommands := map[string]func(Ctx) string{
@@ -190,7 +190,7 @@ LOOP:
 					allMessage:  telegramUpdate.Message.Text,
 					messageCmd:  messageCmd,
 					messageArgs: messageArgs,
-					exitChan:    exitChan,
+					exitSignal:  exitSignal,
 				}
 
 				switch {
@@ -229,7 +229,7 @@ LOOP:
 		case <-vacuumTicker:
 			users.ClearOldUsers()
 
-		case <-exitChan:
+		case <-exitSignal:
 			break LOOP
 		}
 	}

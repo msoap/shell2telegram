@@ -24,7 +24,7 @@ type Ctx struct {
 	allMessage  string        // user message completely
 	messageCmd  string        // command name
 	messageArgs string        // command arguments
-	exitChan    chan struct{} // for signal for terminate
+	exitSignal  chan struct{} // for signal for terminate bot
 }
 
 // /auth and /authroot - authorize users
@@ -210,7 +210,7 @@ func cmdShell2telegramExit(ctx Ctx) (replayMsg string) {
 	if ctx.appConfig.addExit {
 		replayMsg = "bye..."
 		go func() {
-			ctx.exitChan <- struct{}{}
+			ctx.exitSignal <- struct{}{}
 		}()
 	}
 	return replayMsg
