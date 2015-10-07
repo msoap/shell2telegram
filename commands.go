@@ -42,7 +42,7 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 		}
 		secretCodeMsg := fmt.Sprintf("Request %saccess for %s. Code: %s\n", rootRoleStr, ctx.users.String(ctx.userID), authCode)
 		fmt.Print(secretCodeMsg)
-		ctx.users.BroadcastForRoots(ctx.bot, secretCodeMsg)
+		ctx.users.BroadcastForRoots(ctx.bot, secretCodeMsg, 0)
 
 	} else {
 		if ctx.users.IsValidCode(ctx.userID, ctx.messageArgs, forRoot) {
@@ -84,6 +84,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			"/shell2telegram ban <user_id|username> → ban user",
 			"/shell2telegram desc <bot description> → set bot description",
 			"/shell2telegram rm </command> → delete command",
+			"/shell2telegram broadcast_to_root <message> → send message to all root users in private chat",
 			"/shell2telegram version → show version",
 		)
 		if ctx.appConfig.addExit {
@@ -213,6 +214,23 @@ func cmdShell2telegramExit(ctx Ctx) (replayMsg string) {
 			ctx.exitSignal <- struct{}{}
 		}()
 	}
+	return replayMsg
+}
+
+// /shell2telegram broadcast_to_root - broadcast message to root users in private chat
+func cmdShell2telegramBroadcastToRoot(ctx Ctx) (replayMsg string) {
+	message := ctx.messageArgs
+
+	if message == "" {
+		replayMsg = "Please set message: /shell2telegram broadcast_to_root <message>"
+	} else {
+		ctx.users.BroadcastForRoots(ctx.bot,
+			fmt.Sprintf("Message from %s:\n%s", ctx.users.String(ctx.userID), message),
+			ctx.userID, // dont send self
+		)
+		replayMsg = "Message sent"
+	}
+
 	return replayMsg
 }
 

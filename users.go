@@ -141,9 +141,9 @@ func (users Users) IsRoot(userID int) bool {
 }
 
 // BroadcastForRoots - send message to all root users
-func (users Users) BroadcastForRoots(bot *tgbotapi.BotAPI, message string) {
-	for _, user := range users.list {
-		if user.IsRoot && user.PrivateChatID > 0 {
+func (users Users) BroadcastForRoots(bot *tgbotapi.BotAPI, message string, excludeID int) {
+	for userID, user := range users.list {
+		if user.IsRoot && user.PrivateChatID > 0 && (excludeID == 0 || excludeID != userID) {
 			sendMessageWithLogging(bot, user.PrivateChatID, message)
 		}
 	}

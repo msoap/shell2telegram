@@ -152,13 +152,14 @@ func main() {
 
 	// all /shell2telegram sub-commands handlers
 	internalCommands := map[string]func(Ctx) string{
-		"stat":    cmdShell2telegramStat,
-		"ban":     cmdShell2telegramBan,
-		"search":  cmdShell2telegramSearch,
-		"desc":    cmdShell2telegramDesc,
-		"rm":      cmdShell2telegramRm,
-		"exit":    cmdShell2telegramExit,
-		"version": cmdShell2telegramVersion,
+		"stat":              cmdShell2telegramStat,
+		"ban":               cmdShell2telegramBan,
+		"search":            cmdShell2telegramSearch,
+		"desc":              cmdShell2telegramDesc,
+		"rm":                cmdShell2telegramRm,
+		"exit":              cmdShell2telegramExit,
+		"version":           cmdShell2telegramVersion,
+		"broadcast_to_root": cmdShell2telegramBroadcastToRoot,
 	}
 
 LOOP:

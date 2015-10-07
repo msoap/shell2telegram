@@ -50,21 +50,22 @@ If chat command is /:plain_text - get user message without any /command (for pri
 Predefined bot commands
 -----------------------
 
-  * /help - list available commands
-  * /auth - begin authorize new user
-  * /auth CODE - authorize with code from console or from exists root user
-  * /authroot - same for new root user
-  * /authroot CODE - same for new root user
+  * `/help` - list available commands
+  * `/auth` - begin authorize new user
+  * `/auth CODE` - authorize with code from console or from exists root user
+  * `/authroot` - same for new root user
+  * `/authroot CODE` - same for new root user
 
 for root users only:
 
-  * /shell2telegram stat - show users statistics
-  * /shell2telegram search query - search users by name/id
-  * /shell2telegram ban user_id|username - ban user
-  * /shell2telegram exit - terminate bot (for run with -add-exit)
-  * /shell2telegram desc "description" - set bot description
-  * /shell2telegram rm "/command" - delete command
-  * /shell2telegram version - show version
+  * `/shell2telegram stat` - show users statistics
+  * `/shell2telegram search query` - search users by name/id
+  * `/shell2telegram ban user_id|username` - ban user
+  * `/shell2telegram exit` - terminate bot (for run with -add-exit)
+  * `/shell2telegram desc "description"` - set bot description
+  * `/shell2telegram rm "/command"` - delete command
+  * `/shell2telegram broadcast_to_root "message"` - send message to all root users in private chat
+  * `/shell2telegram version` - show version
 
 Examples
 --------
