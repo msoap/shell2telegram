@@ -4,8 +4,8 @@ import "testing"
 
 func Test_splitStringHalfBySpace(t *testing.T) {
 	data := []struct {
-		in               string
-		out_one, out_two string
+		in             string
+		outOne, outTwo string
 	}{
 		{
 			"/cmd args",
@@ -30,8 +30,8 @@ func Test_splitStringHalfBySpace(t *testing.T) {
 
 	for _, item := range data {
 		one, two := splitStringHalfBySpace(item.in)
-		if !(one == item.out_one && two == item.out_two) {
-			t.Errorf("Failing for \"%s\"\nexpected: (%#v, %#v)\nreal: (%#v, %#v)\n", item.in, item.out_one, item.out_two, one, two)
+		if !(one == item.outOne && two == item.outTwo) {
+			t.Errorf("Failing for \"%s\"\nexpected: (%#v, %#v)\nreal: (%#v, %#v)\n", item.in, item.outOne, item.outTwo, one, two)
 		}
 	}
 }

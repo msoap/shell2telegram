@@ -140,7 +140,7 @@ func (users Users) IsRoot(userID int) bool {
 	return isRoot
 }
 
-// broadcastForRoots - send message to all root users
+// BroadcastForRoots - send message to all root users
 func (users Users) BroadcastForRoots(bot *tgbotapi.BotAPI, message string) {
 	for _, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 {
@@ -172,7 +172,7 @@ func (users Users) StringVerbose(userID int) string {
 	return result
 }
 
-// clearOldUsers - clear old users without login
+// ClearOldUsers - clear old users without login
 func (users Users) ClearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
@@ -183,7 +183,7 @@ func (users Users) ClearOldUsers() {
 	}
 }
 
-// getUserIDByName - find user by login
+// GetUserIDByName - find user by login
 func (users Users) GetUserIDByName(userName string) int {
 	userID := 0
 	for id, user := range users.list {
@@ -196,7 +196,7 @@ func (users Users) GetUserIDByName(userName string) int {
 	return userID
 }
 
-// banUser - ban user by ID
+// BanUser - ban user by ID
 func (users Users) BanUser(userID int) bool {
 	if _, ok := users.list[userID]; ok {
 		users.list[userID].IsAuthorized = false

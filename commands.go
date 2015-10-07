@@ -183,16 +183,16 @@ func cmdShell2telegramDesc(ctx Ctx) (replayMsg string) {
 
 // /shell2telegram rm "/command" - delete command
 func cmdShell2telegramRm(ctx Ctx) (replayMsg string) {
-	command_name := ctx.messageArgs
+	commandName := ctx.messageArgs
 
-	if command_name == "" {
+	if commandName == "" {
 		return "Please set command for delete: /shell2telegram rm </command>"
 	}
-	if _, ok := ctx.commands[command_name]; ok {
-		delete(ctx.commands, command_name)
-		replayMsg = "Deleted command: " + command_name
+	if _, ok := ctx.commands[commandName]; ok {
+		delete(ctx.commands, commandName)
+		replayMsg = "Deleted command: " + commandName
 	} else {
-		replayMsg = fmt.Sprintf("Command %s not found", command_name)
+		replayMsg = fmt.Sprintf("Command %s not found", commandName)
 	}
 
 	return replayMsg
