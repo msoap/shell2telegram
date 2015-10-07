@@ -16,14 +16,15 @@ import (
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
 	bot         *tgbotapi.BotAPI
-	appConfig   *Config  // configuration
-	commands    Commands // all chat commands
-	users       Users    // all users
-	userID      int      // current user
-	allowExec   bool     // is user authorized
-	allMessage  string   // user message completely
-	messageCmd  string   // command name
-	messageArgs string   // command arguments
+	appConfig   *Config       // configuration
+	commands    Commands      // all chat commands
+	users       Users         // all users
+	userID      int           // current user
+	allowExec   bool          // is user authorized
+	allMessage  string        // user message completely
+	messageCmd  string        // command name
+	messageArgs string        // command arguments
+	exitChan    chan struct{} // for signal for terminate
 }
 
 // /auth and /authroot - authorize users
@@ -195,6 +196,23 @@ func cmdShell2telegramRm(ctx Ctx) (replayMsg string) {
 		replayMsg = fmt.Sprintf("Command %s not found", commandName)
 	}
 
+	return replayMsg
+}
+
+// /shell2telegram version - get version
+func cmdShell2telegramVersion(ctx Ctx) (replayMsg string) {
+	replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
+	return replayMsg
+}
+
+// /shell2telegram exit - terminate bot
+func cmdShell2telegramExit(ctx Ctx) (replayMsg string) {
+	if ctx.appConfig.addExit {
+		replayMsg = "bye..."
+		go func() {
+			ctx.exitChan <- struct{}{}
+		}()
+	}
 	return replayMsg
 }
 

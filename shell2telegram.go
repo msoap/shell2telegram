@@ -146,13 +146,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	doExit := false
-	allowPlainText := false
-	if _, ok := commands["/:plain_text"]; ok {
-		allowPlainText = true
-	}
 	users := NewUsers(appConfig)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
+	exitChan := make(chan struct{})
+
+	// all /shell2telegram sub-commands handlers
+	internalCommands := map[string]func(Ctx) string{
+		"stat":    cmdShell2telegramStat,
+		"ban":     cmdShell2telegramBan,
+		"search":  cmdShell2telegramSearch,
+		"desc":    cmdShell2telegramDesc,
+		"rm":      cmdShell2telegramRm,
+		"exit":    cmdShell2telegramExit,
+		"version": cmdShell2telegramVersion,
+	}
 
 LOOP:
 	for {
@@ -162,22 +169,16 @@ LOOP:
 			messageCmd, messageArgs := splitStringHalfBySpace(telegramUpdate.Message.Text)
 			replayMsg := ""
 
+			allowPlainText := false
+			if _, ok := commands["/:plain_text"]; ok {
+				allowPlainText = true
+			}
+
 			if len(messageCmd) > 0 && (messageCmd[0] == '/' || allowPlainText) {
 
-				userID := telegramUpdate.Message.From.ID
-
 				users.AddNew(telegramUpdate.Message)
+				userID := telegramUpdate.Message.From.ID
 				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
-
-				messageSubCmd := "" // for /shell2telegram commands
-				if messageCmd == "/shell2telegram" {
-					// all /shell2telegram commands available for root only
-					if !users.IsRoot(userID) {
-						continue LOOP
-					}
-
-					messageSubCmd, messageArgs = splitStringHalfBySpace(messageArgs)
-				}
 
 				ctx := Ctx{
 					bot:         bot,
@@ -189,6 +190,7 @@ LOOP:
 					allMessage:  telegramUpdate.Message.Text,
 					messageCmd:  messageCmd,
 					messageArgs: messageArgs,
+					exitChan:    exitChan,
 				}
 
 				switch {
@@ -199,27 +201,14 @@ LOOP:
 				case messageCmd == "/help":
 					replayMsg = cmdHelp(ctx)
 
-				case messageCmd == "/shell2telegram" && messageSubCmd == "stat":
-					replayMsg = cmdShell2telegramStat(ctx)
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "ban":
-					replayMsg = cmdShell2telegramBan(ctx)
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "search":
-					replayMsg = cmdShell2telegramSearch(ctx)
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "desc":
-					replayMsg = cmdShell2telegramDesc(ctx)
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "rm":
-					replayMsg = cmdShell2telegramRm(ctx)
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "exit" && appConfig.addExit:
-					replayMsg = "bye..."
-					doExit = true
-
-				case messageCmd == "/shell2telegram" && messageSubCmd == "version":
-					replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
+				case messageCmd == "/shell2telegram" && users.IsRoot(userID):
+					messageSubCmd, messageArgs := splitStringHalfBySpace(messageArgs)
+					ctx.messageArgs = messageArgs
+					if cmdHandler, ok := internalCommands[messageSubCmd]; ok {
+						replayMsg = cmdHandler(ctx)
+					} else {
+						replayMsg = "Sub-command not found"
+					}
 
 				case allowExec && allowPlainText && messageCmd[0] != '/':
 					replayMsg = cmdPlainText(ctx)
@@ -234,15 +223,14 @@ LOOP:
 					if appConfig.logCommands {
 						log.Printf("%d @%s: %s", userID, telegramUpdate.Message.From.UserName, telegramUpdate.Message.Text)
 					}
-
-					if doExit {
-						break LOOP
-					}
 				}
 			}
 
 		case <-vacuumTicker:
 			users.ClearOldUsers()
+
+		case <-exitChan:
+			break LOOP
 		}
 	}
 }
