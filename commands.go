@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -71,6 +72,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			helpMsg = append(helpMsg, cmd+" → "+shellCmd)
 		}
 	}
+	sort.Strings(helpMsg)
 
 	helpMsg = append(helpMsg,
 		"/auth [code] → authorize user",
@@ -78,18 +80,21 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	)
 
 	if ctx.users.IsRoot(ctx.userID) {
-		helpMsg = append(helpMsg,
-			"/shell2telegram stat → get stat about users",
-			"/shell2telegram search <query> → search users by name/id",
+		helpMsgForRoot := []string{
 			"/shell2telegram ban <user_id|username> → ban user",
+			"/shell2telegram broadcast_to_root <message> → send message to all root users in private chat",
 			"/shell2telegram desc <bot description> → set bot description",
 			"/shell2telegram rm </command> → delete command",
-			"/shell2telegram broadcast_to_root <message> → send message to all root users in private chat",
+			"/shell2telegram search <query> → search users by name/id",
+			"/shell2telegram stat → get stat about users",
 			"/shell2telegram version → show version",
-		)
-		if ctx.appConfig.addExit {
-			helpMsg = append(helpMsg, "/shell2telegram exit → terminate bot")
 		}
+		if ctx.appConfig.addExit {
+			helpMsgForRoot = append(helpMsgForRoot, "/shell2telegram exit → terminate bot")
+		}
+		sort.Strings(helpMsgForRoot)
+
+		helpMsg = append(helpMsg, helpMsgForRoot...)
 	}
 
 	if ctx.appConfig.description != "" {
