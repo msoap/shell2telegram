@@ -101,11 +101,10 @@ func (users Users) DoLogin(userID int, forRoot bool) string {
 // SetAuthorized - set user authorized or authorized as root
 func (users Users) SetAuthorized(userID int, forRoot bool) {
 	users.list[userID].IsAuthorized = true
+	users.list[userID].AuthCode = ""
 	if forRoot {
 		users.list[userID].IsRoot = true
 		users.list[userID].AuthCodeRoot = ""
-	} else {
-		users.list[userID].AuthCode = ""
 	}
 }
 
