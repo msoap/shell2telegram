@@ -60,11 +60,12 @@ for root users only:
 
   * `/shell2telegram stat` - show users statistics
   * `/shell2telegram search query` - search users by name/id
-  * `/shell2telegram ban user_id|username` - ban user
+  * `/shell2telegram ban user_id|@username` - ban user
   * `/shell2telegram exit` - terminate bot (for run with -add-exit)
   * `/shell2telegram desc "description"` - set bot description
   * `/shell2telegram rm "/command"` - delete command
   * `/shell2telegram broadcast_to_root "message"` - send message to all root users in private chat
+  * `/shell2telegram message_to_user user_id|@username "message"` - send message to user in private chat
   * `/shell2telegram version` - show version
 
 Examples

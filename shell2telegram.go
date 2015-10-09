@@ -160,6 +160,7 @@ func main() {
 		"exit":              cmdShell2telegramExit,
 		"version":           cmdShell2telegramVersion,
 		"broadcast_to_root": cmdShell2telegramBroadcastToRoot,
+		"message_to_user":   cmdShell2telegramMessageToUser,
 	}
 
 LOOP:

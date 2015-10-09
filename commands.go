@@ -6,9 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/Syfaro/telegram-bot-api"
@@ -84,6 +82,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 			"/shell2telegram ban <user_id|username> → ban user",
 			"/shell2telegram broadcast_to_root <message> → send message to all root users in private chat",
 			"/shell2telegram desc <bot description> → set bot description",
+			"/shell2telegram message_to_user <user_id|username> <message> → send message to user in private chat",
 			"/shell2telegram rm </command> → delete command",
 			"/shell2telegram search <query> → search users by name/id",
 			"/shell2telegram stat → get stat about users",
@@ -138,14 +137,10 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 	userName := ctx.messageArgs
 
 	if userName == "" {
-		return "Please set user_id or login: /shell2telegram ban <user_id|@username>"
+		return "Please set user_id or login: /shell2telegram ban <user_id|username>"
 	}
 
-	userID, err := strconv.Atoi(userName)
-	if err != nil {
-		userName = regexp.MustCompile("@").ReplaceAllLiteralString(userName, "")
-		userID = ctx.users.GetUserIDByName(userName)
-	}
+	userID := ctx.users.FindByIDOrUserName(userName)
 
 	if userID > 0 && ctx.users.BanUser(userID) {
 		replayMsg = fmt.Sprintf("User %s banned", ctx.users.String(userID))
@@ -234,6 +229,26 @@ func cmdShell2telegramBroadcastToRoot(ctx Ctx) (replayMsg string) {
 			ctx.userID, // dont send self
 		)
 		replayMsg = "Message sent"
+	}
+
+	return replayMsg
+}
+
+// /shell2telegram message_to_user user_id|username "message" - send message to user in private chat
+func cmdShell2telegramMessageToUser(ctx Ctx) (replayMsg string) {
+	userName, message := splitStringHalfBySpace(ctx.messageArgs)
+
+	if userName == "" || message == "" {
+		replayMsg = "Please set user_name and message: /shell2telegram message_to_user <user_id|username> <message>"
+	} else {
+		userID := ctx.users.FindByIDOrUserName(userName)
+
+		if userID > 0 {
+			ctx.users.SendMessageToPrivate(ctx.bot, userID, message)
+			replayMsg = "Message sent"
+		} else {
+			replayMsg = "User not found"
+		}
 	}
 
 	return replayMsg

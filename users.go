@@ -214,7 +214,7 @@ func (users Users) BanUser(userID int) bool {
 func (users Users) Search(query string) (result []int) {
 	queryUserID, _ := strconv.Atoi(query)
 	query = strings.ToLower(query)
-	queryAsLogin := regexp.MustCompile("@").ReplaceAllLiteralString(query, "")
+	queryAsLogin := cleanUserName(query)
 
 	for userID, user := range users.list {
 		if queryUserID == userID ||
@@ -228,6 +228,31 @@ func (users Users) Search(query string) (result []int) {
 	return result
 }
 
+// FindByIDOrUserName - find users or by ID or by @name
+func (users Users) FindByIDOrUserName(userName string) int {
+	userID, err := strconv.Atoi(userName)
+	if err == nil {
+		if _, ok := users.list[userID]; !ok {
+			userID = 0
+		}
+	} else {
+		userName = cleanUserName(userName)
+		userID = users.GetUserIDByName(userName)
+	}
+
+	return userID
+}
+
+// SendMessageToPrivate - send message to user to private chat
+func (users Users) SendMessageToPrivate(bot *tgbotapi.BotAPI, userID int, message string) bool {
+	if user, ok := users.list[userID]; ok && user.PrivateChatID > 0 {
+		sendMessageWithLogging(bot, user.PrivateChatID, message)
+		return true
+	} else {
+		return false
+	}
+}
+
 // getRandomCode - generate random code for authorize user
 func getRandomCode() string {
 	buffer := make([]byte, CODE_BYTES_LENGTH)
@@ -238,4 +263,9 @@ func getRandomCode() string {
 	}
 
 	return base64.URLEncoding.EncodeToString(buffer)
+}
+
+// cleanUserName - remove @ from telegram username
+func cleanUserName(in string) string {
+	return regexp.MustCompile("@").ReplaceAllLiteralString(in, "")
 }
