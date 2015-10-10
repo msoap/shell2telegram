@@ -11,6 +11,9 @@ import (
 	"regexp"
 )
 
+// length of random code in bytes
+const CODE_BYTES_LENGTH = 15
+
 // exec shell commands with text to STDIN
 func execShell(shellCmd, input string, varsNames []string) (result string) {
 	shell, params := "sh", []string{"-c", shellCmd}

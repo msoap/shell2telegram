@@ -31,9 +31,6 @@ type Users struct {
 	predefinedRootUsers    map[string]bool
 }
 
-// length of random code in bytes
-const CODE_BYTES_LENGTH = 15
-
 // clear old users after 20 minutes after login
 const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
 
