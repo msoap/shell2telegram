@@ -12,19 +12,27 @@ import (
 )
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string) (result string) {
+func execShell(shellCmd, input string, varsNames []string) (result string) {
 	shell, params := "sh", []string{"-c", shellCmd}
 	osExecCommand := exec.Command(shell, params...)
 	osExecCommand.Stderr = os.Stderr
 
-	// write user input to STDIN
 	if input != "" {
-		stdin, err := osExecCommand.StdinPipe()
-		if err == nil {
-			io.WriteString(stdin, input)
-			stdin.Close()
+		if len(varsNames) > 0 {
+			// set user input to shell vars
+			arguments := regexp.MustCompile(`\s+`).Split(input, len(varsNames))
+			for i, arg := range arguments {
+				osExecCommand.Env = append(osExecCommand.Env, fmt.Sprintf("%s=%s", varsNames[i], arg))
+			}
 		} else {
-			log.Print("get STDIN error: ", err)
+			// write user input to STDIN
+			stdin, err := osExecCommand.StdinPipe()
+			if err == nil {
+				io.WriteString(stdin, input)
+				stdin.Close()
+			} else {
+				log.Print("get STDIN error: ", err)
+			}
 		}
 	}
 

@@ -47,6 +47,19 @@ All text after /chat_command will be sent to STDIN of shell command.
 
 If chat command is /:plain_text - get user message without any /command (for private chats only)
 
+Modificators for bot commands
+-----------------------------
+
+  * `/:plain_text` - get user message without any /command, `/:plain_text 'sort'`
+  * `:desc` - setting the description of command, `/cmd:desc="Command name" 'shell cmd'`
+  * `:vars` - to create environment variables instead of text output to STDIN, `/cmd:vars=VAR1,VAR2 'echo $VAR1 / $VAR2'`
+
+TODO:
+
+  * `:image_out=1` - shell command create image, `/get_image:image_out=1 'cat file.png'`
+  * `/:image` - shell command for get image from user, `/:image 'cat > file.png; echo ok'` (for private chats only)
+  * `/:image:image_out=1` - in and out image command, `/:image:image_out=1 'cat > file.png; cat file2.png'` (for private chats only)
+
 Predefined bot commands
 -----------------------
 
@@ -72,7 +85,14 @@ Examples
 --------
 
     # system information
-    shell2telegram /top 'top -l 1 | head -10' /date 'date' /ps 'ps aux -m | head -20'
+    shell2telegram /top:desc="System information" 'top -l 1 | head -10' /date 'date' /ps 'ps aux -m | head -20'
+    
+    # sort any input
+    shell2telegram /:plain_text sort
+    
+    # alarm bot:
+    # /alarm time_in_seconds message
+    shell2telegram /alarm:vars=SLEEP,MSG 'sleep $SLEEP; echo $MSG'
     
     # sound volume control via telegram (Mac OS)
     shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \
