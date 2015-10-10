@@ -1,11 +1,8 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"fmt"
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -250,21 +247,4 @@ func (users Users) SendMessageToPrivate(bot *tgbotapi.BotAPI, userID int, messag
 		return true
 	}
 	return false
-}
-
-// getRandomCode - generate random code for authorize user
-func getRandomCode() string {
-	buffer := make([]byte, CODE_BYTES_LENGTH)
-	_, err := rand.Read(buffer)
-	if err != nil {
-		log.Print("Get code error: ", err)
-		return ""
-	}
-
-	return base64.URLEncoding.EncodeToString(buffer)
-}
-
-// cleanUserName - remove @ from telegram username
-func cleanUserName(in string) string {
-	return regexp.MustCompile("@").ReplaceAllLiteralString(in, "")
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -111,18 +110,6 @@ func sendMessageWithLogging(bot *tgbotapi.BotAPI, chatID int, replayMsg string) 
 	if err != nil {
 		log.Print("Bot send message error: ", err)
 	}
-}
-
-// ----------------------------------------------------------------------------
-// return 2 strings, second="" if string dont contain space
-func splitStringHalfBySpace(str string) (one, two string) {
-	array := regexp.MustCompile(`\s+`).Split(str, 2)
-	one, two = array[0], ""
-	if len(array) > 1 {
-		two = array[1]
-	}
-
-	return one, two
 }
 
 // ----------------------------------------------------------------------------
