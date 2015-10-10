@@ -214,7 +214,7 @@ LOOP:
 
 				} // switch for commands
 
-				if replayMsg != "" {
+				if !stringIsEmpty(replayMsg) {
 					sendMessageWithLogging(bot, telegramUpdate.Message.Chat.ID, replayMsg)
 					if appConfig.logCommands {
 						log.Printf("%d @%s: %s", userID, telegramUpdate.Message.From.UserName, telegramUpdate.Message.Text)

@@ -159,3 +159,37 @@ func Test_parseBotCommand(t *testing.T) {
 		}
 	}
 }
+
+func Test_stringIsEmpty(t *testing.T) {
+	data := []struct {
+		in  string
+		out bool
+	}{
+		{
+			"1234",
+			false,
+		}, {
+			" str ",
+			false,
+		}, {
+			"",
+			true,
+		}, {
+			"  ",
+			true,
+		}, {
+			"\n",
+			true,
+		}, {
+			"  \ndew",
+			false,
+		},
+	}
+
+	for _, item := range data {
+		out := stringIsEmpty(item.in)
+		if out != item.out {
+			t.Errorf("Failing for %#v\nexpected: %v, real: %v\n", item.in, item.out, out)
+		}
+	}
+}

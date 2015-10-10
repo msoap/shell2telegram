@@ -72,7 +72,7 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 	if len(pathRaw) == 0 || pathRaw[0] != '/' {
 		return "", command, fmt.Errorf("error: path %s dont starts with /", pathRaw)
 	}
-	if isEmpty, _ := regexp.MatchString(`^\s*$`, shellCmd); isEmpty {
+	if stringIsEmpty(shellCmd) {
 		return "", command, fmt.Errorf("error: shell command cannot be empty")
 	}
 
@@ -139,4 +139,10 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 
 	// pp.Println(path, command)
 	return path, command, nil
+}
+
+// stringIsEmpty - check string is empty
+func stringIsEmpty(str string) bool {
+	isEmpty, _ := regexp.MatchString(`^\s*$`, str)
+	return isEmpty
 }
