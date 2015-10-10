@@ -248,9 +248,8 @@ func (users Users) SendMessageToPrivate(bot *tgbotapi.BotAPI, userID int, messag
 	if user, ok := users.list[userID]; ok && user.PrivateChatID > 0 {
 		sendMessageWithLogging(bot, user.PrivateChatID, message)
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 // getRandomCode - generate random code for authorize user
