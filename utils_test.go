@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 )
@@ -113,7 +112,7 @@ func Test_parseBotCommand(t *testing.T) {
 			command: Command{
 				shell:       "",
 				description: "",
-				vars:        []string{},
+				vars:        nil,
 			},
 			errFunc: fmt.Errorf("error"),
 		},
@@ -125,7 +124,7 @@ func Test_parseBotCommand(t *testing.T) {
 			command: Command{
 				shell:       "ls",
 				description: "Command name",
-				vars:        []string{"VAR1", "VAR23"},
+				vars:        []string{"VAR1", "VAR2"},
 			},
 			errFunc: nil,
 		},
@@ -133,9 +132,10 @@ func Test_parseBotCommand(t *testing.T) {
 
 	for _, item := range data {
 		path, command, errFunc := parseBotCommand(item.pathRaw, item.shellCmd)
-		jsonMust, _ := json.Marshal(item.command)
-		jsonIn, _ := json.Marshal(command)
-		if path != item.path || ((errFunc == nil) != (item.errFunc == nil) || string(jsonIn) != string(jsonMust)) {
+		commandMust := fmt.Sprintf("%#v", item.command)
+		commandGet := fmt.Sprintf("%#v", command)
+
+		if path != item.path || ((errFunc == nil) != (item.errFunc == nil) || commandGet != commandMust) {
 			t.Errorf("Failing for %v\nGot: path: %s, %#v\n", item, path, command)
 		}
 	}
