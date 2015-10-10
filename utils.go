@@ -3,9 +3,41 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"log"
+	"os"
+	"os/exec"
 	"regexp"
 )
+
+// exec shell commands with text to STDIN
+func execShell(shellCmd, input string) (result string) {
+	shell, params := "sh", []string{"-c", shellCmd}
+	osExecCommand := exec.Command(shell, params...)
+	osExecCommand.Stderr = os.Stderr
+
+	// write user input to STDIN
+	if input != "" {
+		stdin, err := osExecCommand.StdinPipe()
+		if err == nil {
+			io.WriteString(stdin, input)
+			stdin.Close()
+		} else {
+			log.Print("get STDIN error: ", err)
+		}
+	}
+
+	shellOut, err := osExecCommand.Output()
+	if err != nil {
+		log.Print("exec error: ", err)
+		result = fmt.Sprintf("exec error: %s", err)
+	} else {
+		result = string(shellOut)
+	}
+
+	return result
+}
 
 // return 2 strings, second="" if string dont contain space
 func splitStringHalfBySpace(str string) (one, two string) {

@@ -154,7 +154,7 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 // all commands from command-line
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
-		replayMsg = _execShell(cmd, ctx.messageArgs)
+		replayMsg = execShell(cmd, ctx.messageArgs)
 	}
 
 	return replayMsg
@@ -163,7 +163,7 @@ func cmdUser(ctx Ctx) (replayMsg string) {
 // plain text handler
 func cmdPlainText(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands["/:plain_text"]; found {
-		replayMsg = _execShell(cmd, ctx.allMessage)
+		replayMsg = execShell(cmd, ctx.allMessage)
 	}
 
 	return replayMsg
@@ -252,32 +252,4 @@ func cmdShell2telegramMessageToUser(ctx Ctx) (replayMsg string) {
 	}
 
 	return replayMsg
-}
-
-// internal function for exec shell commands
-func _execShell(shellCmd, input string) (result string) {
-	shell, params := "sh", []string{"-c", shellCmd}
-	osExecCommand := exec.Command(shell, params...)
-	osExecCommand.Stderr = os.Stderr
-
-	// write user input to STDIN
-	if input != "" {
-		stdin, err := osExecCommand.StdinPipe()
-		if err == nil {
-			io.WriteString(stdin, input)
-			stdin.Close()
-		} else {
-			log.Print("get STDIN error: ", err)
-		}
-	}
-
-	shellOut, err := osExecCommand.Output()
-	if err != nil {
-		log.Print("exec error: ", err)
-		result = fmt.Sprintf("exec error: %s", err)
-	} else {
-		result = string(shellOut)
-	}
-
-	return result
 }
