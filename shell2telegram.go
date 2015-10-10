@@ -17,8 +17,15 @@ const VERSION = "1.1"
 // bot default timeout
 const DEFAULT_BOT_TIMEOUT = 60
 
-// Commands - one command type
-type Commands map[string]string
+// Command - one user command
+type Command struct {
+	shell       string   // shell command (/cmd)
+	description string   // command description for list in /help (/cmd:desc="Command name")
+	vars        []string // environment vars for user text, split by `/s+` to vars (/cmd:vars=SUBCOMMAND,ARGS)
+}
+
+// Commands - list of all commands
+type Commands map[string]Command
 
 // Config - config struct
 type Config struct {
@@ -84,15 +91,15 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	// need >= 2 arguments and count of it must be even
 	args := flag.Args()
 	if len(args) < 2 || len(args)%2 == 1 {
-		return commands, appConfig, fmt.Errorf("error: need pairs of chat-command and shell-command")
+		return commands, appConfig, fmt.Errorf("error: need pairs of /chat-command and shell-command")
 	}
 
 	for i := 0; i < len(args); i += 2 {
-		path, cmd := args[i], args[i+1]
-		if path[0] != '/' {
-			return commands, appConfig, fmt.Errorf("error: path %s dont starts with /", path)
+		path, command, err := parseBotCommand(args[i], args[i+1]) // (/path, shell_command)
+		if err != nil {
+			return commands, appConfig, err
 		}
-		commands[path] = cmd
+		commands[path] = command
 	}
 
 	if appConfig.token == "" {

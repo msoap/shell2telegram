@@ -63,8 +63,12 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	helpMsg := []string{}
 
 	if ctx.allowExec {
-		for cmd, shellCmd := range ctx.commands {
-			helpMsg = append(helpMsg, cmd+" → "+shellCmd)
+		for cmd, shellCmdRow := range ctx.commands {
+			description := shellCmdRow.description
+			if description == "" {
+				description = shellCmdRow.shell
+			}
+			helpMsg = append(helpMsg, cmd+" → "+description)
 		}
 	}
 	sort.Strings(helpMsg)
@@ -151,7 +155,7 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 // all commands from command-line
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
-		replayMsg = execShell(cmd, ctx.messageArgs)
+		replayMsg = execShell(cmd.shell, ctx.messageArgs)
 	}
 
 	return replayMsg
@@ -160,7 +164,7 @@ func cmdUser(ctx Ctx) (replayMsg string) {
 // plain text handler
 func cmdPlainText(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands["/:plain_text"]; found {
-		replayMsg = execShell(cmd, ctx.allMessage)
+		replayMsg = execShell(cmd.shell, ctx.allMessage)
 	}
 
 	return replayMsg

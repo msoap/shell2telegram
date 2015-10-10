@@ -66,3 +66,77 @@ func getRandomCode() string {
 
 	return base64.URLEncoding.EncodeToString(buffer)
 }
+
+// parseBotCommand - parse command-line arguments for one bot command
+func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, err error) {
+	if len(pathRaw) == 0 || pathRaw[0] != '/' {
+		return "", command, fmt.Errorf("error: path %s dont starts with /", pathRaw)
+	}
+	if isEmpty, _ := regexp.MatchString(`^\s*$`, shellCmd); isEmpty {
+		return "", command, fmt.Errorf("error: shell command cannot be empty")
+	}
+
+	_parseVars := func(varsParts []string) (desc string, vars []string, err error) {
+		for _, oneVar := range varsParts {
+			oneVarParts := regexp.MustCompile("=").Split(oneVar, 2)
+			if len(oneVarParts) != 2 {
+				err = fmt.Errorf("error: parse command modificators: %s", oneVar)
+				return
+			} else if oneVarParts[0] == "desc" {
+				desc = oneVarParts[1]
+				if desc == "" {
+					err = fmt.Errorf("error: command description cannot be empty")
+					return
+				}
+			} else if oneVarParts[0] == "vars" {
+				vars = regexp.MustCompile(",").Split(oneVarParts[1], -1)
+				for _, oneVarName := range vars {
+					if oneVarName == "" {
+						err = fmt.Errorf("error: var name cannot be empty")
+						return
+					}
+				}
+			} else if oneVarParts[0] == "image_out" {
+				log.Print("Not implemented")
+			} else {
+				err = fmt.Errorf("error: parse command modificators, not found %s", oneVarParts[0])
+				return
+			}
+		}
+
+		return desc, vars, nil
+	}
+
+	pathParts := regexp.MustCompile(":").Split(pathRaw, -1)
+	desc, vars := "", []string{}
+	switch {
+	case len(pathParts) == 1:
+		// /, /cmd
+		path = pathParts[0]
+	case pathParts[0] == "/" && regexp.MustCompile("^(plain_text|image)$").MatchString(pathParts[1]):
+		// /:plain_text, /:image, /:plain_text:desc=name
+		path = "/:" + pathParts[1]
+		if pathParts[1] == "image" {
+			log.Print("/:image not implemented")
+		}
+		if len(pathParts) > 2 {
+			desc, vars, err = _parseVars(pathParts[2:])
+		}
+	case len(pathParts) > 1:
+		// commands with modificators :desc, :vars
+		path = pathParts[0]
+		desc, vars, err = _parseVars(pathParts[1:])
+	}
+	if err != nil {
+		return "", command, err
+	}
+
+	command = Command{
+		shell:       shellCmd,
+		description: desc,
+		vars:        vars,
+	}
+
+	// pp.Println(path, command)
+	return path, command, nil
+}
