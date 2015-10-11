@@ -47,6 +47,8 @@ All text after /chat_command will be sent to STDIN of shell command.
 
 If chat command is /:plain_text - get user message without any /command (for private chats only)
 
+Possible long-running shell processes (for example alarm/timer bot).
+
 Modificators for bot commands
 -----------------------------
 

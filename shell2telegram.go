@@ -39,6 +39,12 @@ type Config struct {
 	description            string   // description of bot
 }
 
+// BotMessage - record for send via channel for send message to telegram chat
+type BotMessage struct {
+	chatID  int
+	message string
+}
+
 // ----------------------------------------------------------------------------
 // get config
 func getConfig() (commands Commands, appConfig Config, err error) {
@@ -112,11 +118,13 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 }
 
 // ----------------------------------------------------------------------------
-func sendMessageWithLogging(bot *tgbotapi.BotAPI, chatID int, replayMsg string) {
-	_, err := bot.SendMessage(tgbotapi.NewMessage(chatID, replayMsg))
-	if err != nil {
-		log.Print("Bot send message error: ", err)
-	}
+func sendMessage(messageSignal chan<- BotMessage, chatID int, message string) {
+	go func() {
+		messageSignal <- BotMessage{
+			chatID:  chatID,
+			message: message,
+		}
+	}()
 }
 
 // ----------------------------------------------------------------------------
@@ -141,6 +149,7 @@ func main() {
 	}
 
 	users := NewUsers(appConfig)
+	messageSignal := make(chan BotMessage)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 	exitSignal := make(chan struct{})
 
@@ -157,8 +166,8 @@ func main() {
 		"message_to_user":   cmdShell2telegramMessageToUser,
 	}
 
-LOOP:
-	for {
+	doExit := false
+	for !doExit {
 		select {
 		case telegramUpdate := <-bot.Updates:
 
@@ -177,16 +186,17 @@ LOOP:
 				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
 
 				ctx := Ctx{
-					bot:         bot,
-					appConfig:   &appConfig,
-					commands:    commands,
-					users:       users,
-					userID:      userID,
-					allowExec:   allowExec,
-					allMessage:  telegramUpdate.Message.Text,
-					messageCmd:  messageCmd,
-					messageArgs: messageArgs,
-					exitSignal:  exitSignal,
+					appConfig:     &appConfig,
+					commands:      commands,
+					users:         users,
+					userID:        userID,
+					allowExec:     allowExec,
+					allMessage:    telegramUpdate.Message.Text,
+					messageCmd:    messageCmd,
+					messageArgs:   messageArgs,
+					messageSignal: messageSignal,
+					chatID:        telegramUpdate.Message.Chat.ID,
+					exitSignal:    exitSignal,
 				}
 
 				switch {
@@ -207,18 +217,26 @@ LOOP:
 					}
 
 				case allowExec && allowPlainText && messageCmd[0] != '/':
-					replayMsg = cmdPlainText(ctx)
+					// send message from goroutine after exec shell command
+					_ = cmdPlainText(ctx)
 
 				case allowExec:
-					replayMsg = cmdUser(ctx)
+					_ = cmdUser(ctx)
 
 				} // switch for commands
 
-				if !stringIsEmpty(replayMsg) {
-					sendMessageWithLogging(bot, telegramUpdate.Message.Chat.ID, replayMsg)
-					if appConfig.logCommands {
-						log.Printf("%d @%s: %s", userID, telegramUpdate.Message.From.UserName, telegramUpdate.Message.Text)
-					}
+				if appConfig.logCommands {
+					log.Printf("%s: %s", users.String(userID), telegramUpdate.Message.Text)
+				}
+
+				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, replayMsg)
+			}
+
+		case botMessage := <-messageSignal:
+			if !stringIsEmpty(botMessage.message) {
+				_, err := bot.SendMessage(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
+				if err != nil {
+					log.Print("Bot send message error: ", err)
 				}
 			}
 
@@ -226,7 +244,7 @@ LOOP:
 			users.ClearOldUsers()
 
 		case <-exitSignal:
-			break LOOP
+			doExit = true
 		}
 	}
 }

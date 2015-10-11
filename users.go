@@ -134,10 +134,10 @@ func (users Users) IsRoot(userID int) bool {
 }
 
 // BroadcastForRoots - send message to all root users
-func (users Users) BroadcastForRoots(bot *tgbotapi.BotAPI, message string, excludeID int) {
+func (users Users) BroadcastForRoots(messageSignal chan<- BotMessage, message string, excludeID int) {
 	for userID, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 && (excludeID == 0 || excludeID != userID) {
-			sendMessageWithLogging(bot, user.PrivateChatID, message)
+			sendMessage(messageSignal, user.PrivateChatID, message)
 		}
 	}
 }
@@ -238,9 +238,9 @@ func (users Users) FindByIDOrUserName(userName string) int {
 }
 
 // SendMessageToPrivate - send message to user to private chat
-func (users Users) SendMessageToPrivate(bot *tgbotapi.BotAPI, userID int, message string) bool {
+func (users Users) SendMessageToPrivate(messageSignal chan<- BotMessage, userID int, message string) bool {
 	if user, ok := users.list[userID]; ok && user.PrivateChatID > 0 {
-		sendMessageWithLogging(bot, user.PrivateChatID, message)
+		sendMessage(messageSignal, user.PrivateChatID, message)
 		return true
 	}
 	return false

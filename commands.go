@@ -5,22 +5,21 @@ import (
 	"log"
 	"sort"
 	"strings"
-
-	"github.com/Syfaro/telegram-bot-api"
 )
 
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
-	bot         *tgbotapi.BotAPI
-	appConfig   *Config       // configuration
-	commands    Commands      // all chat commands
-	users       Users         // all users
-	userID      int           // current user
-	allowExec   bool          // is user authorized
-	allMessage  string        // user message completely
-	messageCmd  string        // command name
-	messageArgs string        // command arguments
-	exitSignal  chan struct{} // for signal for terminate bot
+	appConfig     *Config           // configuration
+	commands      Commands          // all chat commands
+	users         Users             // all users
+	userID        int               // current user
+	allowExec     bool              // is user authorized
+	allMessage    string            // user message completely
+	messageCmd    string            // command name
+	messageArgs   string            // command arguments
+	messageSignal chan<- BotMessage // for send telegram messages
+	chatID        int               // chat for send replay
+	exitSignal    chan<- struct{}   // for signal for terminate bot
 }
 
 // /auth and /authroot - authorize users
@@ -38,7 +37,7 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 		}
 		secretCodeMsg := fmt.Sprintf("Request %saccess for %s. Code: %s\n", rootRoleStr, ctx.users.String(ctx.userID), authCode)
 		fmt.Print(secretCodeMsg)
-		ctx.users.BroadcastForRoots(ctx.bot, secretCodeMsg, 0)
+		ctx.users.BroadcastForRoots(ctx.messageSignal, secretCodeMsg, 0)
 
 	} else {
 		if ctx.users.IsValidCode(ctx.userID, ctx.messageArgs, forRoot) {
@@ -155,19 +154,25 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 // all commands from command-line
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
-		replayMsg = execShell(cmd.shell, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
+		go func() {
+			replayMsg = execShell(cmd.shell, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
+			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
+		}()
 	}
 
-	return replayMsg
+	return ""
 }
 
 // plain text handler
 func cmdPlainText(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands["/:plain_text"]; found {
-		replayMsg = execShell(cmd.shell, ctx.allMessage, ctx.commands["/:plain_text"].vars)
+		go func() {
+			replayMsg = execShell(cmd.shell, ctx.allMessage, ctx.commands["/:plain_text"].vars)
+			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
+		}()
 	}
 
-	return replayMsg
+	return ""
 }
 
 // set bot description
@@ -225,7 +230,7 @@ func cmdShell2telegramBroadcastToRoot(ctx Ctx) (replayMsg string) {
 	if message == "" {
 		replayMsg = "Please set message: /shell2telegram broadcast_to_root <message>"
 	} else {
-		ctx.users.BroadcastForRoots(ctx.bot,
+		ctx.users.BroadcastForRoots(ctx.messageSignal,
 			fmt.Sprintf("Message from %s:\n%s", ctx.users.String(ctx.userID), message),
 			ctx.userID, // dont send self
 		)
@@ -245,7 +250,7 @@ func cmdShell2telegramMessageToUser(ctx Ctx) (replayMsg string) {
 		userID := ctx.users.FindByIDOrUserName(userName)
 
 		if userID > 0 {
-			ctx.users.SendMessageToPrivate(ctx.bot, userID, message)
+			ctx.users.SendMessageToPrivate(ctx.messageSignal, userID, message)
 			replayMsg = "Message sent"
 		} else {
 			replayMsg = "User not found"
