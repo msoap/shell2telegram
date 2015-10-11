@@ -17,6 +17,9 @@ const VERSION = "1.1"
 // bot default timeout
 const DEFAULT_BOT_TIMEOUT = 60
 
+// size of channel for bot messages
+const MESSAGES_QUEUE_SIZE = 10
+
 // Command - one user command
 type Command struct {
 	shell       string   // shell command (/cmd)
@@ -149,7 +152,7 @@ func main() {
 	}
 
 	users := NewUsers(appConfig)
-	messageSignal := make(chan BotMessage)
+	messageSignal := make(chan BotMessage, MESSAGES_QUEUE_SIZE)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 	exitSignal := make(chan struct{})
 
