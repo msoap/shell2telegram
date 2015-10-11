@@ -12,7 +12,7 @@ import (
 )
 
 // version
-const VERSION = "1.1"
+const VERSION = "1.2"
 
 // bot default timeout
 const DEFAULT_BOT_TIMEOUT = 60
