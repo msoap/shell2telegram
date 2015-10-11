@@ -139,7 +139,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Authorized on bot account: %s", bot.Self.UserName)
+	log.Printf("Authorized on bot account: @%s", bot.Self.UserName)
 
 	tgbotConfig := tgbotapi.NewUpdate(0)
 	tgbotConfig.Timeout = appConfig.botTimeout
