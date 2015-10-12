@@ -20,6 +20,9 @@ const DEFAULT_BOT_TIMEOUT = 60
 // size of channel for bot messages
 const MESSAGES_QUEUE_SIZE = 10
 
+// max length of one bot message
+const MAX_MESSAGE_LENGTH = 4096
+
 // Command - one user command
 type Command struct {
 	shell       string   // shell command (/cmd)
@@ -123,9 +126,17 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 // ----------------------------------------------------------------------------
 func sendMessage(messageSignal chan<- BotMessage, chatID int, message string) {
 	go func() {
-		messageSignal <- BotMessage{
-			chatID:  chatID,
-			message: message,
+		messagesList := []string{message}
+
+		if len(message) > MAX_MESSAGE_LENGTH {
+			messagesList = splitStringLinesBySize(message, MAX_MESSAGE_LENGTH)
+		}
+
+		for _, messageChunk := range messagesList {
+			messageSignal <- BotMessage{
+				chatID:  chatID,
+				message: messageChunk,
+			}
 		}
 	}()
 }

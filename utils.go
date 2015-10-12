@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 )
 
 // length of random code in bytes
@@ -156,4 +157,29 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 func stringIsEmpty(str string) bool {
 	isEmpty, _ := regexp.MatchString(`^\s*$`, str)
 	return isEmpty
+}
+
+// split string by chunks less maxSize size (whole rows)
+func splitStringLinesBySize(input string, maxSize int) []string {
+	result := []string{}
+	parts := regexp.MustCompile("\n").Split(input, -1)
+	chunks := []string{parts[0]}
+	chunkSize := len(parts[0])
+
+	for _, part := range parts[1:] {
+		// current + "\n" + next > maxSize
+		if chunkSize+1+len(part) > maxSize {
+			result = append(result, strings.Join(chunks, "\n"))
+			chunks = []string{part}
+			chunkSize = len(part)
+		} else {
+			chunks = append(chunks, part)
+			chunkSize += 1 + len(part)
+		}
+	}
+	if len(chunks) > 0 {
+		result = append(result, strings.Join(chunks, "\n"))
+	}
+
+	return result
 }
