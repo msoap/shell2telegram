@@ -196,27 +196,39 @@ func Test_stringIsEmpty(t *testing.T) {
 
 func Test_splitStringLinesBySize(t *testing.T) {
 	data := []struct {
-		in  string
-		out []string
+		in      string
+		maxSize int
+		out     []string
 	}{
 		{
 			"12345",
+			6,
 			[]string{"12345"},
 		}, {
 			"12345\n67890",
-			[]string{"12345", "67890"},
+			11,
+			[]string{"12345\n67890"},
 		}, {
-			"12345\n67890",
-			[]string{"12345", "67890"},
+			"1234567890\n1234567890",
+			3,
+			[]string{"1234567890", "1234567890"},
+		}, {
+			"12\n34\n56\n78\n90",
+			6,
+			[]string{"12\n34", "56\n78", "90"},
+		}, {
+			"12\n34aaaaaaaaaaaaa\n56\n78\n90",
+			6,
+			[]string{"12", "34aaaaaaaaaaaaa", "56\n78", "90"},
 		},
 	}
 
 	for _, item := range data {
-		out := splitStringLinesBySize(item.in, 6)
+		out := splitStringLinesBySize(item.in, item.maxSize)
 		mustOut := fmt.Sprintf("%#v", item.out)
 		getOut := fmt.Sprintf("%#v", out)
 		if mustOut != getOut {
-			t.Errorf("Failing for %#v\nexpected: %s, real: %s\n", item.in, mustOut, getOut)
+			t.Errorf("Failing for %#v (by %d)\nexpected: %s, real: %s\n", item.in, item.maxSize, mustOut, getOut)
 		}
 	}
 }
