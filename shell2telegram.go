@@ -185,15 +185,22 @@ func main() {
 		select {
 		case telegramUpdate := <-bot.Updates:
 
-			messageCmd, messageArgs := splitStringHalfBySpace(telegramUpdate.Message.Text)
-			replayMsg := ""
+			var messageCmd, messageArgs string
+			allUserMessage := telegramUpdate.Message.Text
+			if len(allUserMessage) > 0 && allUserMessage[0] == '/' {
+				messageCmd, messageArgs = splitStringHalfBySpace(allUserMessage)
+			} else {
+				messageCmd, messageArgs = "/:plain_text", allUserMessage
+			}
 
 			allowPlainText := false
 			if _, ok := commands["/:plain_text"]; ok {
 				allowPlainText = true
 			}
 
-			if len(messageCmd) > 0 && (messageCmd[0] == '/' || allowPlainText) {
+			replayMsg := ""
+
+			if len(messageCmd) > 0 && (messageCmd != "/:plain_text" || allowPlainText) {
 
 				users.AddNew(telegramUpdate.Message)
 				userID := telegramUpdate.Message.From.ID
@@ -205,7 +212,6 @@ func main() {
 					users:         users,
 					userID:        userID,
 					allowExec:     allowExec,
-					allMessage:    telegramUpdate.Message.Text,
 					messageCmd:    messageCmd,
 					messageArgs:   messageArgs,
 					messageSignal: messageSignal,
@@ -230,17 +236,13 @@ func main() {
 						replayMsg = "Sub-command not found"
 					}
 
-				case allowExec && allowPlainText && messageCmd[0] != '/':
-					// send message from goroutine after exec shell command
-					_ = cmdPlainText(ctx)
-
-				case allowExec:
+				case allowExec && (allowPlainText && messageCmd == "/:plain_text" || messageCmd[0] == '/'):
 					_ = cmdUser(ctx)
 
 				} // switch for commands
 
 				if appConfig.logCommands {
-					log.Printf("%s: %s", users.String(userID), telegramUpdate.Message.Text)
+					log.Printf("%s: %s", users.String(userID), allUserMessage)
 				}
 
 				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, replayMsg)

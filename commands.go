@@ -14,7 +14,6 @@ type Ctx struct {
 	users         Users             // all users
 	userID        int               // current user
 	allowExec     bool              // is user authorized
-	allMessage    string            // user message completely
 	messageCmd    string            // command name
 	messageArgs   string            // command arguments
 	messageSignal chan<- BotMessage // for send telegram messages
@@ -108,6 +107,18 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	return replayMsg
 }
 
+// all commands from command-line
+func cmdUser(ctx Ctx) (replayMsg string) {
+	if cmd, found := ctx.commands[ctx.messageCmd]; found {
+		go func() {
+			replayMsg = execShell(cmd.shell, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
+			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
+		}()
+	}
+
+	return ""
+}
+
 // /shell2telegram stat
 func cmdShell2telegramStat(ctx Ctx) (replayMsg string) {
 	for userID := range ctx.users.list {
@@ -149,30 +160,6 @@ func cmdShell2telegramBan(ctx Ctx) (replayMsg string) {
 	}
 
 	return replayMsg
-}
-
-// all commands from command-line
-func cmdUser(ctx Ctx) (replayMsg string) {
-	if cmd, found := ctx.commands[ctx.messageCmd]; found {
-		go func() {
-			replayMsg = execShell(cmd.shell, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
-			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
-		}()
-	}
-
-	return ""
-}
-
-// plain text handler
-func cmdPlainText(ctx Ctx) (replayMsg string) {
-	if cmd, found := ctx.commands["/:plain_text"]; found {
-		go func() {
-			replayMsg = execShell(cmd.shell, ctx.allMessage, ctx.commands["/:plain_text"].vars)
-			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
-		}()
-	}
-
-	return ""
 }
 
 // set bot description
