@@ -193,9 +193,9 @@ func (users *Users) ClearOldUsers() {
 			time.Now().Sub(user.LastAccessTime).Seconds() > SECONDS_FOR_OLD_USERS_BEFORE_VACUUM {
 			log.Printf("Vacuum: %d, %s", id, users.String(id))
 			delete(users.list, id)
+			users.needSaveDB = true
 		}
 	}
-	users.needSaveDB = true
 }
 
 // GetUserIDByName - find user by login
@@ -213,7 +213,6 @@ func (users Users) GetUserIDByName(userName string) int {
 
 // BanUser - ban user by ID
 func (users *Users) BanUser(userID int) bool {
-	users.needSaveDB = true
 
 	if _, ok := users.list[userID]; ok {
 		users.list[userID].IsAuthorized = false
@@ -222,6 +221,7 @@ func (users *Users) BanUser(userID int) bool {
 			delete(users.predefinedAllowedUsers, users.list[userID].UserName)
 			delete(users.predefinedRootUsers, users.list[userID].UserName)
 		}
+		users.needSaveDB = true
 		return true
 	}
 
