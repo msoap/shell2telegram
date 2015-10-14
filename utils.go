@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 )
 
@@ -182,4 +183,39 @@ func splitStringLinesBySize(input string, maxSize int) []string {
 	}
 
 	return result
+}
+
+// create dir if it is not exists
+func createDirIfNeed(dir string) {
+	if _, err := os.Stat(dir); err != nil {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			log.Fatal("create dir error:", dir)
+		}
+	}
+}
+
+// get home dir
+func getOsUserHomeDir() string {
+	homeDir := os.Getenv("HOME")
+	if runtime.GOOS == "windows" {
+		homeDir = os.Getenv("APPDATA")
+	}
+	return homeDir
+}
+
+// read default or user db file name
+func getDBFilePath(usersDBFile string, needCreateDir bool) string {
+	fileName := ""
+	if usersDBFile == "" {
+		dirName := getOsUserHomeDir() + string(os.PathSeparator) + ".config"
+		if needCreateDir {
+			createDirIfNeed(dirName)
+		}
+		fileName = dirName + string(os.PathSeparator) + DB_FILE_NAME
+	} else {
+		fileName = usersDBFile
+	}
+
+	return fileName
 }

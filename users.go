@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
@@ -12,16 +14,17 @@ import (
 
 // User - one telegram user who interact with bot
 type User struct {
-	UserName       string
-	FirstName      string
-	LastName       string
-	AuthCode       string
-	AuthCodeRoot   string
-	IsAuthorized   bool
-	IsRoot         bool
-	PrivateChatID  int
-	Counter        int
-	LastAccessTime time.Time
+	UserID         int       `json:"user_id"`          // telegram UserID
+	UserName       string    `json:"user_name"`        // telegram @login
+	FirstName      string    `json:"first_name"`       // telegram name
+	LastName       string    `json:"last_name"`        // -//-
+	AuthCode       string    `json:"auth_code"`        // code for authorize
+	AuthCodeRoot   string    `json:"auth_code_root"`   // code for authorize root
+	IsAuthorized   bool      `json:"is_authorized"`    // user allow chat with bot
+	IsRoot         bool      `json:"is_root"`          // user is root, allow authorize/ban other users, remove commands, stop bot
+	PrivateChatID  int       `json:"private_chat_id"`  // last private chat with bot
+	Counter        int       `json:"counter"`          // how many commands send
+	LastAccessTime time.Time `json:"last_access_time"` // time of last command
 }
 
 // Users in chat
@@ -29,6 +32,13 @@ type Users struct {
 	list                   map[int]*User
 	predefinedAllowedUsers map[string]bool
 	predefinedRootUsers    map[string]bool
+	needSaveDB             bool // non-saved changes in list
+}
+
+// Users for save into JSON
+type UsersDB struct {
+	Users    []User    `json:"users"`
+	DateTime time.Time `json:"date_time"`
 }
 
 // clear old users after 20 minutes after login
@@ -40,6 +50,11 @@ func NewUsers(appConfig Config) Users {
 		list: map[int]*User{},
 		predefinedAllowedUsers: map[string]bool{},
 		predefinedRootUsers:    map[string]bool{},
+		needSaveDB:             true,
+	}
+
+	if appConfig.persistentUsers {
+		users.LoadFromDB(appConfig.usersDB)
 	}
 
 	for _, name := range appConfig.predefinedAllowedUsers {
@@ -53,16 +68,18 @@ func NewUsers(appConfig Config) Users {
 }
 
 // AddNew - add new user if not exists
-func (users Users) AddNew(tgbotMessage tgbotapi.Message) {
+func (users *Users) AddNew(tgbotMessage tgbotapi.Message) {
 	privateChatID := 0
 	if !tgbotMessage.IsGroup() {
 		privateChatID = tgbotMessage.Chat.ID
 	}
 
-	if _, ok := users.list[tgbotMessage.From.ID]; ok && privateChatID > 0 {
+	if _, ok := users.list[tgbotMessage.From.ID]; ok && privateChatID > 0 && privateChatID != users.list[tgbotMessage.From.ID].PrivateChatID {
 		users.list[tgbotMessage.From.ID].PrivateChatID = privateChatID
+		users.needSaveDB = true
 	} else if !ok {
 		users.list[tgbotMessage.From.ID] = &User{
+			UserID:        tgbotMessage.From.ID,
 			UserName:      tgbotMessage.From.UserName,
 			FirstName:     tgbotMessage.From.FirstName,
 			LastName:      tgbotMessage.From.LastName,
@@ -70,6 +87,7 @@ func (users Users) AddNew(tgbotMessage tgbotapi.Message) {
 			IsRoot:        users.predefinedRootUsers[tgbotMessage.From.UserName],
 			PrivateChatID: privateChatID,
 		}
+		users.needSaveDB = true
 	}
 
 	// collect stat
@@ -80,7 +98,7 @@ func (users Users) AddNew(tgbotMessage tgbotapi.Message) {
 }
 
 // DoLogin - generate secret code
-func (users Users) DoLogin(userID int, forRoot bool) string {
+func (users *Users) DoLogin(userID int, forRoot bool) string {
 	code := getRandomCode()
 	if forRoot {
 		users.list[userID].IsRoot = false
@@ -89,17 +107,20 @@ func (users Users) DoLogin(userID int, forRoot bool) string {
 		users.list[userID].IsAuthorized = false
 		users.list[userID].AuthCode = code
 	}
+	users.needSaveDB = true
+
 	return code
 }
 
 // SetAuthorized - set user authorized or authorized as root
-func (users Users) SetAuthorized(userID int, forRoot bool) {
+func (users *Users) SetAuthorized(userID int, forRoot bool) {
 	users.list[userID].IsAuthorized = true
 	users.list[userID].AuthCode = ""
 	if forRoot {
 		users.list[userID].IsRoot = true
 		users.list[userID].AuthCodeRoot = ""
 	}
+	users.needSaveDB = true
 }
 
 // IsValidCode - check secret code for user
@@ -166,7 +187,7 @@ func (users Users) StringVerbose(userID int) string {
 }
 
 // ClearOldUsers - clear old users without login
-func (users Users) ClearOldUsers() {
+func (users *Users) ClearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
 			time.Now().Sub(user.LastAccessTime).Seconds() > SECONDS_FOR_OLD_USERS_BEFORE_VACUUM {
@@ -174,6 +195,7 @@ func (users Users) ClearOldUsers() {
 			delete(users.list, id)
 		}
 	}
+	users.needSaveDB = true
 }
 
 // GetUserIDByName - find user by login
@@ -190,7 +212,9 @@ func (users Users) GetUserIDByName(userName string) int {
 }
 
 // BanUser - ban user by ID
-func (users Users) BanUser(userID int) bool {
+func (users *Users) BanUser(userID int) bool {
+	users.needSaveDB = true
+
 	if _, ok := users.list[userID]; ok {
 		users.list[userID].IsAuthorized = false
 		users.list[userID].IsRoot = false
@@ -244,4 +268,53 @@ func (users Users) SendMessageToPrivate(messageSignal chan<- BotMessage, userID 
 		return true
 	}
 	return false
+}
+
+// LoadFromDB - load users list from json file
+func (users *Users) LoadFromDB(usersDBFile string) {
+	usersList := UsersDB{}
+
+	fileNamePath := getDBFilePath(usersDBFile, false)
+	usersJSON, err := ioutil.ReadFile(fileNamePath)
+	if err == nil {
+		if err = json.Unmarshal(usersJSON, &usersList); err == nil {
+			for _, user := range usersList.Users {
+				users.list[user.UserID] = &user
+			}
+		}
+	}
+	if err == nil {
+		log.Printf("Loaded usersDB json from: %s", fileNamePath)
+	} else {
+		log.Printf("Load usersDB (%s) error: %s", fileNamePath, err)
+	}
+
+	users.needSaveDB = false
+}
+
+// SaveToDB - save users list to json file
+func (users *Users) SaveToDB(usersDBFile string) {
+	if users.needSaveDB {
+		usersList := UsersDB{
+			Users:    []User{},
+			DateTime: time.Now(),
+		}
+		for _, user := range users.list {
+			usersList.Users = append(usersList.Users, *user)
+		}
+
+		fileNamePath := getDBFilePath(usersDBFile, true)
+		json, err := json.MarshalIndent(usersList, "", "  ")
+		if err == nil {
+			err = ioutil.WriteFile(fileNamePath, json, 0644)
+		}
+
+		if err == nil {
+			log.Printf("Saved usersDB json to: %s", fileNamePath)
+		} else {
+			log.Printf("Save usersDB (%s) error: %s", fileNamePath, err)
+		}
+
+		users.needSaveDB = false
+	}
 }

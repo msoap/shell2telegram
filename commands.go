@@ -10,8 +10,8 @@ import (
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
 	appConfig     *Config           // configuration
+	users         *Users            // all users
 	commands      Commands          // all chat commands
-	users         Users             // all users
 	userID        int               // current user
 	allowExec     bool              // is user authorized
 	messageCmd    string            // command name

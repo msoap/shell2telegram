@@ -38,6 +38,8 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -tb-token=<TOKEN>    : setting bot token (or set TB_TOKEN variable)
         -timeout=<NN>        : setting timeout for bot (default 60 sec)
         -description=<TITLE> : setting description of bot
+        -persistent_users    : load/save users from file (default ~/.config/shell2telegram.json)
+        -users_db=<FILENAME> : file for store users
         -version
         -help
 

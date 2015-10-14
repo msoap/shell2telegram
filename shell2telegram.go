@@ -23,6 +23,12 @@ const MESSAGES_QUEUE_SIZE = 10
 // max length of one bot message
 const MAX_MESSAGE_LENGTH = 4096
 
+// save users to file every 1 min (if need)
+const SECONDS_FOR_AUTO_SAVE_USERS_TO_DB = 60
+
+// DB json name
+const DB_FILE_NAME = "shell2telegram.json"
+
 // Command - one user command
 type Command struct {
 	shell       string   // shell command (/cmd)
@@ -43,6 +49,8 @@ type Config struct {
 	allowAll               bool     // allow all user (DANGEROUS!)
 	logCommands            bool     // logging all commands
 	description            string   // description of bot
+	persistentUsers        bool     // load/save users from file
+	usersDB                string   // file for store users
 }
 
 // BotMessage - record for send via channel for send message to telegram chat
@@ -60,6 +68,8 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.BoolVar(&appConfig.allowAll, "allow-all", false, "allow all users (DANGEROUS!)")
 	flag.BoolVar(&appConfig.logCommands, "log-commands", false, "logging all commands")
 	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
+	flag.BoolVar(&appConfig.persistentUsers, "persistent_users", false, "load/save users from file (default ~/.config/shell2telegram.json)")
+	flag.StringVar(&appConfig.usersDB, "users_db", "", "file for store users")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
@@ -165,6 +175,10 @@ func main() {
 	users := NewUsers(appConfig)
 	messageSignal := make(chan BotMessage, MESSAGES_QUEUE_SIZE)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
+	saveToBDTicker := make(<-chan time.Time)
+	if appConfig.persistentUsers {
+		saveToBDTicker = time.Tick(SECONDS_FOR_AUTO_SAVE_USERS_TO_DB * time.Second)
+	}
 	exitSignal := make(chan struct{})
 
 	// all /shell2telegram sub-commands handlers
@@ -208,8 +222,8 @@ func main() {
 
 				ctx := Ctx{
 					appConfig:     &appConfig,
+					users:         &users,
 					commands:      commands,
-					users:         users,
 					userID:        userID,
 					allowExec:     allowExec,
 					messageCmd:    messageCmd,
@@ -255,6 +269,9 @@ func main() {
 					log.Print("Bot send message error: ", err)
 				}
 			}
+
+		case <-saveToBDTicker:
+			users.SaveToDB(appConfig.usersDB)
 
 		case <-vacuumTicker:
 			users.ClearOldUsers()
