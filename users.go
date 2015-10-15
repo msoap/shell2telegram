@@ -35,7 +35,7 @@ type Users struct {
 	needSaveDB             bool // non-saved changes in list
 }
 
-// Users for save into JSON
+// UsersDB -  save list of Users into JSON
 type UsersDB struct {
 	Users    []User    `json:"users"`
 	DateTime time.Time `json:"date_time"`
