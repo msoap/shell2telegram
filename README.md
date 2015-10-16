@@ -63,6 +63,7 @@ TODO:
   * `:image_out=1` - shell command create image, `/get_image:image_out=1 'cat file.png'`
   * `/:image` - shell command for get image from user, `/:image 'cat > file.png; echo ok'` (for private chats only)
   * `/:image:image_out=1` - in and out image command, `/:image:image_out=1 'cat > file.png; cat file2.png'` (for private chats only)
+  * `/cmd:cron=3600` — periodic exec command, `/cmd:on` args - on, `/cmd:off` - off
 
 Predefined bot commands
 -----------------------
