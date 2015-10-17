@@ -11,23 +11,24 @@ import (
 	"github.com/Syfaro/telegram-bot-api"
 )
 
-// version
-const VERSION = "1.2"
+const (
+	VERSION = "1.2"
 
-// bot default timeout
-const DEFAULT_BOT_TIMEOUT = 60
+	// bot default timeout
+	DEFAULT_BOT_TIMEOUT = 60
 
-// size of channel for bot messages
-const MESSAGES_QUEUE_SIZE = 10
+	// size of channel for bot messages
+	MESSAGES_QUEUE_SIZE = 10
 
-// max length of one bot message
-const MAX_MESSAGE_LENGTH = 4096
+	// max length of one bot message
+	MAX_MESSAGE_LENGTH = 4096
 
-// save users to file every 1 min (if need)
-const SECONDS_FOR_AUTO_SAVE_USERS_TO_DB = 60
+	// save users to file every 1 min (if need)
+	SECONDS_FOR_AUTO_SAVE_USERS_TO_DB = 60
 
-// DB json name
-const DB_FILE_NAME = "shell2telegram.json"
+	// DB json name
+	DB_FILE_NAME = "shell2telegram.json"
+)
 
 // Command - one user command
 type Command struct {
