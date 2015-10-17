@@ -85,7 +85,7 @@ func Test_parseBotCommand(t *testing.T) {
 			// out
 			path: "/cmd",
 			command: Command{
-				shell:       "ls",
+				shellCmd:    "ls",
 				description: "",
 				vars:        []string{},
 			},
@@ -97,7 +97,7 @@ func Test_parseBotCommand(t *testing.T) {
 			// out
 			path: "/",
 			command: Command{
-				shell:       "ls",
+				shellCmd:    "ls",
 				description: "",
 				vars:        []string{},
 			},
@@ -110,7 +110,7 @@ func Test_parseBotCommand(t *testing.T) {
 			// out
 			path: "",
 			command: Command{
-				shell:       "",
+				shellCmd:    "",
 				description: "",
 				vars:        nil,
 			},
@@ -122,7 +122,7 @@ func Test_parseBotCommand(t *testing.T) {
 			// out
 			path: "/cmd",
 			command: Command{
-				shell:       "ls",
+				shellCmd:    "ls",
 				description: "Command name",
 				vars:        []string{"VAR1", "VAR2"},
 			},
