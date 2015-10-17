@@ -145,7 +145,7 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 	}
 
 	command = Command{
-		shell:       shellCmd,
+		shellCmd:    shellCmd,
 		description: desc,
 		vars:        vars,
 	}

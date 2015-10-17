@@ -64,7 +64,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 		for cmd, shellCmdRow := range ctx.commands {
 			description := shellCmdRow.description
 			if description == "" {
-				description = shellCmdRow.shell
+				description = shellCmdRow.shellCmd
 			}
 			helpMsg = append(helpMsg, cmd+" → "+description)
 		}
@@ -111,7 +111,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
 		go func() {
-			replayMsg = execShell(cmd.shell, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
+			replayMsg = execShell(cmd.shellCmd, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
 		}()
 	}

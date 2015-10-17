@@ -31,7 +31,7 @@ const DB_FILE_NAME = "shell2telegram.json"
 
 // Command - one user command
 type Command struct {
-	shell       string   // shell command (/cmd)
+	shellCmd    string   // shell command
 	description string   // command description for list in /help (/cmd:desc="Command name")
 	vars        []string // environment vars for user text, split by `/s+` to vars (/cmd:vars=SUBCOMMAND,ARGS)
 }
