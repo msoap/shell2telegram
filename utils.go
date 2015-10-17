@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -17,10 +18,15 @@ import (
 const CODE_BYTES_LENGTH = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string) (result string) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string) (result string) {
 	shell, params := "sh", []string{"-c", shellCmd}
 	osExecCommand := exec.Command(shell, params...)
 	osExecCommand.Stderr = os.Stderr
+
+	// copy variables from parent process
+	for _, env_raw := range os.Environ() {
+		osExecCommand.Env = append(osExecCommand.Env, env_raw)
+	}
 
 	if input != "" {
 		if len(varsNames) > 0 {
@@ -39,6 +45,17 @@ func execShell(shellCmd, input string, varsNames []string) (result string) {
 				log.Print("get STDIN error: ", err)
 			}
 		}
+	}
+
+	// set S2T_* env vars
+	s2tVariables := [...]struct{ name, value string }{
+		{"S2T_LOGIN", userName},
+		{"S2T_USERID", strconv.Itoa(userID)},
+		{"S2T_USERNAME", userDisplayName},
+		{"S2T_CHATID", strconv.Itoa(userID)},
+	}
+	for _, row := range s2tVariables {
+		osExecCommand.Env = append(osExecCommand.Env, fmt.Sprintf("%s=%s", row.name, row.value))
 	}
 
 	shellOut, err := osExecCommand.Output()

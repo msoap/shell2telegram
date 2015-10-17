@@ -5,7 +5,7 @@ run:
         -persistent_users \
         /date:desc="Get current date" date \
         /:plain_text:desc="Numbers via cat -n" 'cat -n' \
-        /alarm:vars=SLEEP,MSG 'sleep $$SLEEP; echo $$MSG'
+        /alarm:vars=SLEEP,MSG 'sleep $$SLEEP; echo Hello $$S2T_USERNAME, $$MSG'
 
 build:
 	go build

@@ -51,6 +51,13 @@ If chat command is /:plain_text - get user message without any /command (for pri
 
 Possible long-running shell processes (for example alarm/timer bot).
 
+Setting environment variables for shell commands:
+
+  * S2T_LOGIN - telegram @login (may be empty)
+  * S2T_USERID - telegram user ID
+  * S2T_USERNAME - telegram user name
+  * S2T_CHATID - chat ID
+
 Modificators for bot commands
 -----------------------------
 
@@ -97,7 +104,7 @@ Examples
     
     # alarm bot:
     # /alarm time_in_seconds message
-    shell2telegram /alarm:vars=SLEEP,MSG 'sleep $SLEEP; echo $MSG'
+    shell2telegram /alarm:vars=SLEEP,MSG 'sleep $SLEEP; echo Hello $S2T_USERNAME; echo Alarm: $MSG'
     
     # sound volume control via telegram (Mac OS)
     shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \

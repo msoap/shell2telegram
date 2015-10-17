@@ -111,7 +111,15 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 func cmdUser(ctx Ctx) (replayMsg string) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
 		go func() {
-			replayMsg = execShell(cmd.shellCmd, ctx.messageArgs, ctx.commands[ctx.messageCmd].vars)
+			replayMsg = execShell(
+				cmd.shellCmd,
+				ctx.messageArgs,
+				ctx.commands[ctx.messageCmd].vars,
+				ctx.userID,
+				ctx.chatID,
+				ctx.users.list[ctx.userID].UserName,
+				ctx.users.list[ctx.userID].FirstName+" "+ctx.users.list[ctx.userID].LastName,
+			)
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsg)
 		}()
 	}
