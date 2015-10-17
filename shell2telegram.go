@@ -12,21 +12,22 @@ import (
 )
 
 const (
+	// VERSION - current version
 	VERSION = "1.2"
 
-	// bot default timeout
+	// DEFAULT_BOT_TIMEOUT - bot default timeout
 	DEFAULT_BOT_TIMEOUT = 60
 
-	// size of channel for bot messages
+	// MESSAGES_QUEUE_SIZE - size of channel for bot messages
 	MESSAGES_QUEUE_SIZE = 10
 
-	// max length of one bot message
+	// MAX_MESSAGE_LENGTH - max length of one bot message
 	MAX_MESSAGE_LENGTH = 4096
 
-	// save users to file every 1 min (if need)
+	// SECONDS_FOR_AUTO_SAVE_USERS_TO_DB - save users to file every 1 min (if need)
 	SECONDS_FOR_AUTO_SAVE_USERS_TO_DB = 60
 
-	// DB json name
+	// DB_FILE_NAME - DB json name
 	DB_FILE_NAME = "shell2telegram.json"
 )
 

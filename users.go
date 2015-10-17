@@ -41,7 +41,7 @@ type UsersDB struct {
 	DateTime time.Time `json:"date_time"`
 }
 
-// clear old users after 20 minutes after login
+// SECONDS_FOR_OLD_USERS_BEFORE_VACUUM - clear old users after 20 minutes after login
 const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
 
 // NewUsers - create Users object

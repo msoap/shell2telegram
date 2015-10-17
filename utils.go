@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-// length of random code in bytes
+// CODE_BYTES_LENGTH - length of random code in bytes
 const CODE_BYTES_LENGTH = 15
 
 // exec shell commands with text to STDIN
@@ -24,8 +24,8 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	osExecCommand.Stderr = os.Stderr
 
 	// copy variables from parent process
-	for _, env_raw := range os.Environ() {
-		osExecCommand.Env = append(osExecCommand.Env, env_raw)
+	for _, envRaw := range os.Environ() {
+		osExecCommand.Env = append(osExecCommand.Env, envRaw)
 	}
 
 	if input != "" {
