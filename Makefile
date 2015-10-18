@@ -15,6 +15,7 @@ test:
 
 lint:
 	golint | grep -v "don't use ALL_CAPS in Go names; use CamelCase" || true
+	go vet
 
 update-from-github:
 	go get -u github.com/msoap/shell2telegram
