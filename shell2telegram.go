@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -55,10 +56,19 @@ type Config struct {
 	usersDB                string   // file for store users
 }
 
+// message types
+const (
+	msgIsText int8 = iota
+	msgIsPhoto
+)
+
 // BotMessage - record for send via channel for send message to telegram chat
 type BotMessage struct {
-	chatID  int
-	message string
+	chatID      int
+	messageType int8
+	message     string
+	fileName    string
+	photo       []byte
 }
 
 // ----------------------------------------------------------------------------
@@ -136,18 +146,50 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 }
 
 // ----------------------------------------------------------------------------
-func sendMessage(messageSignal chan<- BotMessage, chatID int, message string) {
+func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte) {
 	go func() {
-		messagesList := []string{message}
-
-		if len(message) > MAX_MESSAGE_LENGTH {
-			messagesList = splitStringLinesBySize(message, MAX_MESSAGE_LENGTH)
+		fileName := ""
+		fileType := http.DetectContentType(message)
+		switch fileType {
+		case "image/png":
+			fileName = "file.png"
+		case "image/jpeg":
+			fileName = "file.jpeg"
+		case "image/gif":
+			fileName = "file.gif"
+		case "image/bmp":
+			fileName = "file.bmp"
+		default:
+			fileName = "message"
 		}
 
-		for _, messageChunk := range messagesList {
+		if fileName == "message" {
+
+			// is text message
+			messageString := string(message)
+			messagesList := []string{}
+
+			if len(messageString) <= MAX_MESSAGE_LENGTH {
+				messagesList = []string{messageString}
+			} else {
+				messagesList = splitStringLinesBySize(messageString, MAX_MESSAGE_LENGTH)
+			}
+
+			for _, messageChunk := range messagesList {
+				messageSignal <- BotMessage{
+					chatID:      chatID,
+					messageType: msgIsText,
+					message:     messageChunk,
+				}
+			}
+
+		} else {
+			// is image
 			messageSignal <- BotMessage{
-				chatID:  chatID,
-				message: messageChunk,
+				chatID:      chatID,
+				messageType: msgIsPhoto,
+				fileName:    fileName,
+				photo:       message,
 			}
 		}
 	}()
@@ -261,15 +303,20 @@ func main() {
 					log.Printf("%s: %s", users.String(userID), allUserMessage)
 				}
 
-				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, replayMsg)
+				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, []byte(replayMsg))
 			}
 
 		case botMessage := <-messageSignal:
-			if !stringIsEmpty(botMessage.message) {
-				_, err := bot.SendMessage(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
-				if err != nil {
-					log.Print("Bot send message error: ", err)
-				}
+			switch {
+			case botMessage.messageType == msgIsText && !stringIsEmpty(botMessage.message):
+				_, err = bot.SendMessage(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
+			case botMessage.messageType == msgIsPhoto && len(botMessage.photo) > 0:
+				bytesPhoto := tgbotapi.FileBytes{Name: botMessage.fileName, Bytes: botMessage.photo}
+				_, err = bot.SendPhoto(tgbotapi.NewPhotoUpload(botMessage.chatID, bytesPhoto))
+			}
+
+			if err != nil {
+				log.Print("Bot send message error: ", err)
 			}
 
 		case <-saveToBDTicker:

@@ -18,7 +18,7 @@ import (
 const CODE_BYTES_LENGTH = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string) (result string) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string) (result []byte) {
 	shell, params := "sh", []string{"-c", shellCmd}
 	osExecCommand := exec.Command(shell, params...)
 	osExecCommand.Stderr = os.Stderr
@@ -61,9 +61,9 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	shellOut, err := osExecCommand.Output()
 	if err != nil {
 		log.Print("exec error: ", err)
-		result = fmt.Sprintf("exec error: %s", err)
+		result = []byte(fmt.Sprintf("exec error: %s", err))
 	} else {
-		result = string(shellOut)
+		result = shellOut
 	}
 
 	return result

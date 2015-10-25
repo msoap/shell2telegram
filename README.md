@@ -51,6 +51,8 @@ If chat command is /:plain_text - get user message without any /command (for pri
 
 Possible long-running shell processes (for example alarm/timer bot).
 
+Autodetect images (png/jpg/gif/bmp) out from shell command, for example: `/get_image 'cat file.png'`
+
 Setting environment variables for shell commands:
 
   * S2T_LOGIN - telegram @login (may be empty)
@@ -67,9 +69,7 @@ Modificators for bot commands
 
 TODO:
 
-  * `:image_out=1` - shell command create image, `/get_image:image_out=1 'cat file.png'`
   * `/:image` - shell command for get image from user, `/:image 'cat > file.png; echo ok'` (for private chats only)
-  * `/:image:image_out=1` - in and out image command, `/:image:image_out=1 'cat > file.png; cat file2.png'` (for private chats only)
   * `/cmd:cron=3600` — periodic exec command, `/cmd:on` args - on, `/cmd:off` - off
 
 Predefined bot commands
