@@ -70,7 +70,7 @@ Modificators for bot commands
 TODO:
 
   * `/:image` - shell command for get image from user, `/:image 'cat > file.png; echo ok'` (for private chats only)
-  * `/cmd:cron=3600` — periodic exec command, `/cmd:on` args - on, `/cmd:off` - off
+  * `/cmd:cron=3600` — periodic exec command, `/cmd:on args` - on, `/cmd:off` - off
 
 Predefined bot commands
 -----------------------
