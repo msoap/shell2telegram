@@ -20,6 +20,9 @@ const CODE_BYTES_LENGTH = 15
 // exec shell commands with text to STDIN
 func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string) (result []byte) {
 	shell, params := "sh", []string{"-c", shellCmd}
+	if runtime.GOOS == "windows" {
+		shell, params = "cmd", []string{"/C", shellCmd}
+	}
 	osExecCommand := exec.Command(shell, params...)
 	osExecCommand.Stderr = os.Stderr
 
