@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
@@ -220,8 +221,11 @@ func main() {
 	messageSignal := make(chan BotMessage, MESSAGES_QUEUE_SIZE)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 	saveToBDTicker := make(<-chan time.Time)
+	autoSaveOnExitSignal := make(chan os.Signal)
+
 	if appConfig.persistentUsers {
 		saveToBDTicker = time.Tick(SECONDS_FOR_AUTO_SAVE_USERS_TO_DB * time.Second)
+		signal.Notify(autoSaveOnExitSignal, os.Interrupt, os.Kill)
 	}
 	exitSignal := make(chan struct{})
 
@@ -325,7 +329,16 @@ func main() {
 		case <-vacuumTicker:
 			users.ClearOldUsers()
 
+		case <-autoSaveOnExitSignal:
+			users.needSaveDB = true
+			users.SaveToDB(appConfig.usersDB)
+			doExit = true
+
 		case <-exitSignal:
+			if appConfig.persistentUsers {
+				users.needSaveDB = true
+				users.SaveToDB(appConfig.usersDB)
+			}
 			doExit = true
 		}
 	}
