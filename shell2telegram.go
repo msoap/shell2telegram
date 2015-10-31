@@ -221,13 +221,13 @@ func main() {
 	messageSignal := make(chan BotMessage, MESSAGES_QUEUE_SIZE)
 	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
 	saveToBDTicker := make(<-chan time.Time)
+	exitSignal := make(chan struct{})
 	systemExitSignal := make(chan os.Signal)
+	signal.Notify(systemExitSignal, os.Interrupt, os.Kill)
 
 	if appConfig.persistentUsers {
 		saveToBDTicker = time.Tick(SECONDS_FOR_AUTO_SAVE_USERS_TO_DB * time.Second)
-		signal.Notify(systemExitSignal, os.Interrupt, os.Kill)
 	}
-	exitSignal := make(chan struct{})
 
 	// all /shell2telegram sub-commands handlers
 	internalCommands := map[string]func(Ctx) string{
