@@ -1,5 +1,4 @@
-shell2telegram
-==============
+#<img src="https://raw.githubusercontent.com/msoap/shell2telegram/misc/img/shell2telegram_icon.png" width="32" height="32"> shell2telegram
 
 Create Telegram bot from command-line
 
