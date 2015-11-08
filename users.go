@@ -311,10 +311,9 @@ func (users *Users) SaveToDB(usersDBFile string) {
 
 		if err == nil {
 			log.Printf("Saved usersDB json to: %s", fileNamePath)
+			users.needSaveDB = false
 		} else {
 			log.Printf("Save usersDB (%s) error: %s", fileNamePath, err)
 		}
-
-		users.needSaveDB = false
 	}
 }
