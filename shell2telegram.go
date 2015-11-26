@@ -212,7 +212,7 @@ func main() {
 
 	tgbotConfig := tgbotapi.NewUpdate(0)
 	tgbotConfig.Timeout = appConfig.botTimeout
-	err = bot.UpdatesChan(tgbotConfig)
+	botUpdatesChan, err := bot.GetUpdatesChan(tgbotConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -245,7 +245,7 @@ func main() {
 	doExit := false
 	for !doExit {
 		select {
-		case telegramUpdate := <-bot.Updates:
+		case telegramUpdate := <-botUpdatesChan:
 
 			var messageCmd, messageArgs string
 			allUserMessage := telegramUpdate.Message.Text
@@ -313,10 +313,10 @@ func main() {
 		case botMessage := <-messageSignal:
 			switch {
 			case botMessage.messageType == msgIsText && !stringIsEmpty(botMessage.message):
-				_, err = bot.SendMessage(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
+				_, err = bot.Send(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
 			case botMessage.messageType == msgIsPhoto && len(botMessage.photo) > 0:
 				bytesPhoto := tgbotapi.FileBytes{Name: botMessage.fileName, Bytes: botMessage.photo}
-				_, err = bot.SendPhoto(tgbotapi.NewPhotoUpload(botMessage.chatID, bytesPhoto))
+				_, err = bot.Send(tgbotapi.NewPhotoUpload(botMessage.chatID, bytesPhoto))
 			}
 
 			if err != nil {
