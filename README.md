@@ -46,7 +46,15 @@ If not define -allow-users/-root-users options - authorize users via secret code
 
 All text after /chat_command will be sent to STDIN of shell command.
 
-If chat command is /:plain_text - get user message without any /command (for private chats only)
+Special chat commands (for private chats only):
+
+  * `/:plain_text` - get user message without any /command.
+
+TODO:
+
+  * `/:image` - for get image from user. Example: `/:image 'cat > file.jpg; echo ok'`
+  * `/:file`  - for get file from user
+  * `/:location`  - for get geo-location from user
 
 Possible long-running shell processes (for example alarm/timer bot).
 
@@ -68,7 +76,6 @@ Modificators for bot commands
 
 TODO:
 
-  * `/:image` - shell command for get image from user, `/:image 'cat > file.png; echo ok'` (for private chats only)
   * `/cmd:cron=3600` — periodic exec command, `/cmd:on args` - on, `/cmd:off` - off
 
 Predefined bot commands
