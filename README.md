@@ -46,7 +46,10 @@ If not define -allow-users/-root-users options - authorize users via secret code
 
 All text after /chat_command will be sent to STDIN of shell command.
 
-Special chat commands (for private chats only):
+Special chat commands
+---------------------
+
+for private chats only:
 
   * `/:plain_text` - get user message without any /command.
 
@@ -72,6 +75,7 @@ Modificators for bot commands
 
   * `:desc` - setting the description of command, `/cmd:desc="Command name" 'shell cmd'`
   * `:vars` - to create environment variables instead of text output to STDIN, `/cmd:vars=VAR1,VAR2 'echo $VAR1 / $VAR2'`
+  * `:md` - to send message as markdown text, `/cmd:md 'echo "*bold* and _italic_"'`
 
 TODO:
 

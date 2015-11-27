@@ -108,7 +108,7 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 }
 
 // all commands from command-line
-func cmdUser(ctx Ctx) (replayMsg string) {
+func cmdUser(ctx Ctx) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
 		go func() {
 			replayMsgRaw := execShell(
@@ -120,11 +120,9 @@ func cmdUser(ctx Ctx) (replayMsg string) {
 				ctx.users.list[ctx.userID].UserName,
 				ctx.users.list[ctx.userID].FirstName+" "+ctx.users.list[ctx.userID].LastName,
 			)
-			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw)
+			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw, cmd.isMarkdown)
 		}()
 	}
-
-	return ""
 }
 
 // /shell2telegram stat

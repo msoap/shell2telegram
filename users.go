@@ -158,7 +158,7 @@ func (users Users) IsRoot(userID int) bool {
 func (users Users) BroadcastForRoots(messageSignal chan<- BotMessage, message string, excludeID int) {
 	for userID, user := range users.list {
 		if user.IsRoot && user.PrivateChatID > 0 && (excludeID == 0 || excludeID != userID) {
-			sendMessage(messageSignal, user.PrivateChatID, []byte(message))
+			sendMessage(messageSignal, user.PrivateChatID, []byte(message), false)
 		}
 	}
 }
@@ -264,7 +264,7 @@ func (users Users) FindByIDOrUserName(userName string) int {
 // SendMessageToPrivate - send message to user to private chat
 func (users Users) SendMessageToPrivate(messageSignal chan<- BotMessage, userID int, message string) bool {
 	if user, ok := users.list[userID]; ok && user.PrivateChatID > 0 {
-		sendMessage(messageSignal, user.PrivateChatID, []byte(message))
+		sendMessage(messageSignal, user.PrivateChatID, []byte(message), false)
 		return true
 	}
 	return false

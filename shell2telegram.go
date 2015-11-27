@@ -38,6 +38,7 @@ type Command struct {
 	shellCmd    string   // shell command
 	description string   // command description for list in /help (/cmd:desc="Command name")
 	vars        []string // environment vars for user text, split by `/s+` to vars (/cmd:vars=SUBCOMMAND,ARGS)
+	isMarkdown  bool     // send message in markdown format
 }
 
 // Commands - list of all commands
@@ -70,6 +71,7 @@ type BotMessage struct {
 	message     string
 	fileName    string
 	photo       []byte
+	isMarkdown  bool
 }
 
 // ----------------------------------------------------------------------------
@@ -147,7 +149,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 }
 
 // ----------------------------------------------------------------------------
-func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte) {
+func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, isMarkdown bool) {
 	go func() {
 		fileName := ""
 		fileType := http.DetectContentType(message)
@@ -181,6 +183,7 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte) {
 					chatID:      chatID,
 					messageType: msgIsText,
 					message:     messageChunk,
+					isMarkdown:  isMarkdown,
 				}
 			}
 
@@ -299,7 +302,7 @@ func main() {
 					}
 
 				case allowExec && (allowPlainText && messageCmd == "/:plain_text" || messageCmd[0] == '/'):
-					_ = cmdUser(ctx)
+					cmdUser(ctx)
 
 				} // switch for commands
 
@@ -307,13 +310,17 @@ func main() {
 					log.Printf("%s: %s", users.String(userID), allUserMessage)
 				}
 
-				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, []byte(replayMsg))
+				sendMessage(messageSignal, telegramUpdate.Message.Chat.ID, []byte(replayMsg), false)
 			}
 
 		case botMessage := <-messageSignal:
 			switch {
 			case botMessage.messageType == msgIsText && !stringIsEmpty(botMessage.message):
-				_, err = bot.Send(tgbotapi.NewMessage(botMessage.chatID, botMessage.message))
+				messageConfig := tgbotapi.NewMessage(botMessage.chatID, botMessage.message)
+				if botMessage.isMarkdown {
+					messageConfig.ParseMode = tgbotapi.ModeMarkdown
+				}
+				_, err = bot.Send(messageConfig)
 			case botMessage.messageType == msgIsPhoto && len(botMessage.photo) > 0:
 				bytesPhoto := tgbotapi.FileBytes{Name: botMessage.fileName, Bytes: botMessage.photo}
 				_, err = bot.Send(tgbotapi.NewPhotoUpload(botMessage.chatID, bytesPhoto))

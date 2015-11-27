@@ -109,21 +109,23 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 		return "", command, fmt.Errorf("error: shell command cannot be empty")
 	}
 
-	_parseVars := func(varsParts []string) (desc string, vars []string, err error) {
+	_parseAttr := func(varsParts []string) (command Command, err error) {
 		for _, oneVar := range varsParts {
 			oneVarParts := regexp.MustCompile("=").Split(oneVar, 2)
-			if len(oneVarParts) != 2 {
+			if len(oneVarParts) == 1 && oneVarParts[0] == "md" {
+				command.isMarkdown = true
+			} else if len(oneVarParts) != 2 {
 				err = fmt.Errorf("error: parse command modificators: %s", oneVar)
 				return
 			} else if oneVarParts[0] == "desc" {
-				desc = oneVarParts[1]
-				if desc == "" {
+				command.description = oneVarParts[1]
+				if command.description == "" {
 					err = fmt.Errorf("error: command description cannot be empty")
 					return
 				}
 			} else if oneVarParts[0] == "vars" {
-				vars = regexp.MustCompile(",").Split(oneVarParts[1], -1)
-				for _, oneVarName := range vars {
+				command.vars = regexp.MustCompile(",").Split(oneVarParts[1], -1)
+				for _, oneVarName := range command.vars {
 					if oneVarName == "" {
 						err = fmt.Errorf("error: var name cannot be empty")
 						return
@@ -135,11 +137,10 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 			}
 		}
 
-		return desc, vars, nil
+		return command, nil
 	}
 
 	pathParts := regexp.MustCompile(":").Split(pathRaw, -1)
-	desc, vars := "", []string{}
 	switch {
 	case len(pathParts) == 1:
 		// /, /cmd
@@ -151,24 +152,19 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 			log.Print("/:image not implemented")
 		}
 		if len(pathParts) > 2 {
-			desc, vars, err = _parseVars(pathParts[2:])
+			command, err = _parseAttr(pathParts[2:])
 		}
 	case len(pathParts) > 1:
 		// commands with modificators :desc, :vars
 		path = pathParts[0]
-		desc, vars, err = _parseVars(pathParts[1:])
+		command, err = _parseAttr(pathParts[1:])
 	}
 	if err != nil {
 		return "", command, err
 	}
 
-	command = Command{
-		shellCmd:    shellCmd,
-		description: desc,
-		vars:        vars,
-	}
+	command.shellCmd = shellCmd
 
-	// pp.Println(path, command)
 	return path, command, nil
 }
 

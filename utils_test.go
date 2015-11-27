@@ -87,7 +87,8 @@ func Test_parseBotCommand(t *testing.T) {
 			command: Command{
 				shellCmd:    "ls",
 				description: "",
-				vars:        []string{},
+				vars:        nil,
+				isMarkdown:  false,
 			},
 			errFunc: nil,
 		},
@@ -99,7 +100,8 @@ func Test_parseBotCommand(t *testing.T) {
 			command: Command{
 				shellCmd:    "ls",
 				description: "",
-				vars:        []string{},
+				vars:        nil,
+				isMarkdown:  false,
 			},
 			errFunc: nil,
 		},
@@ -113,6 +115,7 @@ func Test_parseBotCommand(t *testing.T) {
 				shellCmd:    "",
 				description: "",
 				vars:        nil,
+				isMarkdown:  false,
 			},
 			errFunc: fmt.Errorf("error"),
 		},
@@ -125,6 +128,21 @@ func Test_parseBotCommand(t *testing.T) {
 				shellCmd:    "ls",
 				description: "Command name",
 				vars:        []string{"VAR1", "VAR2"},
+				isMarkdown:  false,
+			},
+			errFunc: nil,
+		},
+		{
+			// markdown test
+			pathRaw:  "/cmd:vars=VAR1,VAR2:desc=Command name:md",
+			shellCmd: "ls",
+			// out
+			path: "/cmd",
+			command: Command{
+				shellCmd:    "ls",
+				description: "Command name",
+				vars:        []string{"VAR1", "VAR2"},
+				isMarkdown:  true,
 			},
 			errFunc: nil,
 		},
@@ -136,7 +154,7 @@ func Test_parseBotCommand(t *testing.T) {
 		commandGet := fmt.Sprintf("%#v", command)
 
 		if path != item.path || ((errFunc == nil) != (item.errFunc == nil) || commandGet != commandMust) {
-			t.Errorf("Failing for %v\nGot: path: %s, %#v\n", item, path, command)
+			t.Errorf("Failing for %v (path: %s)\nMust: %s\nGot:  %#v\n", item, path, commandMust, command)
 		}
 	}
 
