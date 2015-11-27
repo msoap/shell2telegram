@@ -129,8 +129,6 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 						return
 					}
 				}
-			} else if oneVarParts[0] == "image_out" {
-				log.Print("Not implemented")
 			} else {
 				err = fmt.Errorf("error: parse command modificators, not found %s", oneVarParts[0])
 				return
