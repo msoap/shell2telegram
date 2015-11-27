@@ -70,7 +70,6 @@ Setting environment variables for shell commands:
 Modificators for bot commands
 -----------------------------
 
-  * `/:plain_text` - get user message without any /command, `/:plain_text 'sort'`
   * `:desc` - setting the description of command, `/cmd:desc="Command name" 'shell cmd'`
   * `:vars` - to create environment variables instead of text output to STDIN, `/cmd:vars=VAR1,VAR2 'echo $VAR1 / $VAR2'`
 
