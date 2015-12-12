@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Syfaro/telegram-bot-api"
+	tgbotapi "github.com/Syfaro/telegram-bot-api"
 )
 
 // User - one telegram user who interact with bot
