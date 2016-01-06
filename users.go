@@ -70,16 +70,17 @@ func NewUsers(appConfig Config) Users {
 // AddNew - add new user if not exists
 func (users *Users) AddNew(tgbotMessage tgbotapi.Message) {
 	privateChatID := 0
-	if !tgbotMessage.IsGroup() {
+	if !tgbotMessage.Chat.IsGroup() {
 		privateChatID = tgbotMessage.Chat.ID
 	}
 
-	if _, ok := users.list[tgbotMessage.From.ID]; ok && privateChatID > 0 && privateChatID != users.list[tgbotMessage.From.ID].PrivateChatID {
-		users.list[tgbotMessage.From.ID].PrivateChatID = privateChatID
+	UserID := tgbotMessage.From.ID
+	if _, ok := users.list[UserID]; ok && privateChatID > 0 && privateChatID != users.list[UserID].PrivateChatID {
+		users.list[UserID].PrivateChatID = privateChatID
 		users.needSaveDB = true
 	} else if !ok {
-		users.list[tgbotMessage.From.ID] = &User{
-			UserID:        tgbotMessage.From.ID,
+		users.list[UserID] = &User{
+			UserID:        UserID,
 			UserName:      tgbotMessage.From.UserName,
 			FirstName:     tgbotMessage.From.FirstName,
 			LastName:      tgbotMessage.From.LastName,
@@ -91,9 +92,9 @@ func (users *Users) AddNew(tgbotMessage tgbotapi.Message) {
 	}
 
 	// collect stat
-	users.list[tgbotMessage.From.ID].LastAccessTime = time.Now()
-	if users.list[tgbotMessage.From.ID].IsAuthorized {
-		users.list[tgbotMessage.From.ID].Counter++
+	users.list[UserID].LastAccessTime = time.Now()
+	if users.list[UserID].IsAuthorized {
+		users.list[UserID].Counter++
 	}
 }
 
