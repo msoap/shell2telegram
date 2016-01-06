@@ -125,5 +125,5 @@ Links
 
   * [Telegram channel about shell2telegram](https://telegram.me/shell2telegram)
   * [About Telegram bots](https://core.telegram.org/bots)
-  * [Golang bindings for the Telegram Bot API](https://github.com/Syfaro/telegram-bot-api)
+  * [Golang bindings for the Telegram Bot API](https://github.com/go-telegram-bot-api/telegram-bot-api)
   * [shell2http - shell commands as http-server](https://github.com/msoap/shell2http)

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	tgbotapi "github.com/Syfaro/telegram-bot-api"
+	tgbotapi "gopkg.in/telegram-bot-api.v1"
 )
 
 const (
