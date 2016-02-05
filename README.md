@@ -3,6 +3,7 @@
 Create Telegram bot from command-line
 
 [![Build Status](https://travis-ci.org/msoap/shell2telegram.svg?branch=master)](https://travis-ci.org/msoap/shell2telegram)
+[![Report Card](http://goreportcard.com/badge/msoap/shell2telegram)](http://goreportcard.com/report/msoap/shell2telegram)
 
 Install
 -------
