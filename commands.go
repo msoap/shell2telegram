@@ -5,6 +5,8 @@ import (
 	"log"
 	"sort"
 	"strings"
+
+	"github.com/koding/cache"
 )
 
 // Ctx - context for bot command function (users, command, args, ...)
@@ -19,6 +21,7 @@ type Ctx struct {
 	messageSignal chan<- BotMessage // for send telegram messages
 	chatID        int               // chat for send replay
 	exitSignal    chan<- struct{}   // for signal for terminate bot
+	cacheTTL      *cache.MemoryTTL  // cache for commands output
 }
 
 // /auth and /authroot - authorize users
@@ -119,6 +122,7 @@ func cmdUser(ctx Ctx) {
 				ctx.chatID,
 				ctx.users.list[ctx.userID].UserName,
 				ctx.users.list[ctx.userID].FirstName+" "+ctx.users.list[ctx.userID].LastName,
+				ctx.cacheTTL,
 			)
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw, cmd.isMarkdown)
 		}()

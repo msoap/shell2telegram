@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/koding/cache"
 	tgbotapi "gopkg.in/telegram-bot-api.v1"
 )
 
@@ -56,6 +57,7 @@ type Config struct {
 	description            string   // description of bot
 	persistentUsers        bool     // load/save users from file
 	usersDB                string   // file for store users
+	cache                  int      // caching command out (in seconds)
 }
 
 // message types
@@ -85,6 +87,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
 	flag.BoolVar(&appConfig.persistentUsers, "persistent_users", false, "load/save users from file (default ~/.config/shell2telegram.json)")
 	flag.StringVar(&appConfig.usersDB, "users_db", "", "file for store users")
+	flag.IntVar(&appConfig.cache, "cache", 0, "caching command out (in seconds)")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
@@ -232,6 +235,12 @@ func main() {
 		saveToBDTicker = time.Tick(SECONDS_FOR_AUTO_SAVE_USERS_TO_DB * time.Second)
 	}
 
+	var cacheTTL *cache.MemoryTTL
+	if appConfig.cache > 0 {
+		cacheTTL = cache.NewMemoryWithTTL(time.Duration(appConfig.cache) * time.Second)
+		cacheTTL.StartGC(time.Duration(appConfig.cache) * time.Second * 2)
+	}
+
 	// all /shell2telegram sub-commands handlers
 	internalCommands := map[string]func(Ctx) string{
 		"stat":              cmdShell2telegramStat,
@@ -282,6 +291,7 @@ func main() {
 					messageSignal: messageSignal,
 					chatID:        telegramUpdate.Message.Chat.ID,
 					exitSignal:    exitSignal,
+					cacheTTL:      cacheTTL,
 				}
 
 				switch {

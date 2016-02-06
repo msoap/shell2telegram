@@ -12,13 +12,26 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/koding/cache"
 )
 
 // CODE_BYTES_LENGTH - length of random code in bytes
 const CODE_BYTES_LENGTH = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string) (result []byte) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cacheTTL *cache.MemoryTTL) (result []byte) {
+	cacheKey := shellCmd + "/" + input
+	if cacheTTL != nil {
+		cacheData, err := cacheTTL.Get(cacheKey)
+		if err != cache.ErrNotFound && err != nil {
+			log.Print(err)
+		} else if err == nil {
+			// cache hit
+			return cacheData.([]byte)
+		}
+	}
+
 	shell, params := "sh", []string{"-c", shellCmd}
 	if runtime.GOOS == "windows" {
 		shell, params = "cmd", []string{"/C", shellCmd}
@@ -67,6 +80,13 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 		result = []byte(fmt.Sprintf("exec error: %s", err))
 	} else {
 		result = shellOut
+	}
+
+	if cacheTTL != nil {
+		err := cacheTTL.Set(cacheKey, result)
+		if err != nil {
+			log.Print(err)
+		}
 	}
 
 	return result
