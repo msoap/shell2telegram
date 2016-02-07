@@ -1,7 +1,7 @@
 #<img src="https://raw.githubusercontent.com/msoap/shell2telegram/misc/img/shell2telegram_icon.png" width="32" height="32"> shell2telegram
 
 [![Build Status](https://travis-ci.org/msoap/shell2telegram.svg?branch=master)](https://travis-ci.org/msoap/shell2telegram)
-[![Report Card](http://goreportcard.com/badge/github.com/msoap/shell2telegram)](http://goreportcard.com/report/github.com/msoap/shell2telegram)
+[![Report Card](https://goreportcard.com/badge/github.com/msoap/shell2telegram)](https://goreportcard.com/report/github.com/msoap/shell2telegram)
 
 Create Telegram bot from command-line
 
