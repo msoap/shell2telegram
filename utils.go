@@ -16,8 +16,8 @@ import (
 	"github.com/koding/cache"
 )
 
-// CODE_BYTES_LENGTH - length of random code in bytes
-const CODE_BYTES_LENGTH = 15
+// codeBytesLength - length of random code in bytes
+const codeBytesLength = 15
 
 // exec shell commands with text to STDIN
 func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cacheTTL *cache.MemoryTTL) (result []byte) {
@@ -110,7 +110,7 @@ func cleanUserName(in string) string {
 
 // getRandomCode - generate random code for authorize user
 func getRandomCode() string {
-	buffer := make([]byte, CODE_BYTES_LENGTH)
+	buffer := make([]byte, codeBytesLength)
 	_, err := rand.Read(buffer)
 	if err != nil {
 		log.Print("Get code error: ", err)
@@ -246,7 +246,7 @@ func getDBFilePath(usersDBFile string, needCreateDir bool) string {
 		if needCreateDir {
 			createDirIfNeed(dirName)
 		}
-		fileName = dirName + string(os.PathSeparator) + DB_FILE_NAME
+		fileName = dirName + string(os.PathSeparator) + DBFileName
 	} else {
 		fileName = usersDBFile
 	}

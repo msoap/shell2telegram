@@ -41,8 +41,8 @@ type UsersDB struct {
 	DateTime time.Time `json:"date_time"`
 }
 
-// SECONDS_FOR_OLD_USERS_BEFORE_VACUUM - clear old users after 20 minutes after login
-const SECONDS_FOR_OLD_USERS_BEFORE_VACUUM = 1200
+// SecondsForOldUsersBeforeVacuum - clear old users after 20 minutes after login
+const SecondsForOldUsersBeforeVacuum = 1200
 
 // NewUsers - create Users object
 func NewUsers(appConfig Config) Users {
@@ -191,7 +191,7 @@ func (users Users) StringVerbose(userID int) string {
 func (users *Users) ClearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
-			time.Now().Sub(user.LastAccessTime).Seconds() > SECONDS_FOR_OLD_USERS_BEFORE_VACUUM {
+			time.Now().Sub(user.LastAccessTime).Seconds() > SecondsForOldUsersBeforeVacuum {
 			log.Printf("Vacuum: %d, %s", id, users.String(id))
 			delete(users.list, id)
 			users.needSaveDB = true

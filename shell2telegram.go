@@ -15,23 +15,23 @@ import (
 )
 
 const (
-	// VERSION - current version
-	VERSION = "1.2"
+	// Version - current version
+	Version = "1.2"
 
-	// DEFAULT_BOT_TIMEOUT - bot default timeout
-	DEFAULT_BOT_TIMEOUT = 60
+	// DefaultBotTimeout - bot default timeout
+	DefaultBotTimeout = 60
 
-	// MESSAGES_QUEUE_SIZE - size of channel for bot messages
-	MESSAGES_QUEUE_SIZE = 10
+	// MessagesQueueSize - size of channel for bot messages
+	MessagesQueueSize = 10
 
-	// MAX_MESSAGE_LENGTH - max length of one bot message
-	MAX_MESSAGE_LENGTH = 4096
+	// MaxMessageLength - max length of one bot message
+	MaxMessageLength = 4096
 
-	// SECONDS_FOR_AUTO_SAVE_USERS_TO_DB - save users to file every 1 min (if need)
-	SECONDS_FOR_AUTO_SAVE_USERS_TO_DB = 60
+	// SecondsForAutoSaveUsersToDB - save users to file every 1 min (if need)
+	SecondsForAutoSaveUsersToDB = 60
 
-	// DB_FILE_NAME - DB json name
-	DB_FILE_NAME = "shell2telegram.json"
+	// DBFileName - DB json name
+	DBFileName = "shell2telegram.json"
 )
 
 // Command - one user command
@@ -81,7 +81,7 @@ type BotMessage struct {
 func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.StringVar(&appConfig.token, "tb-token", "", "setting bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&appConfig.addExit, "add-exit", false, "adding \"/shell2telegram exit\" command for terminate bot (for roots only)")
-	flag.IntVar(&appConfig.botTimeout, "timeout", DEFAULT_BOT_TIMEOUT, "setting timeout for bot")
+	flag.IntVar(&appConfig.botTimeout, "timeout", DefaultBotTimeout, "setting timeout for bot")
 	flag.BoolVar(&appConfig.allowAll, "allow-all", false, "allow all users (DANGEROUS!)")
 	flag.BoolVar(&appConfig.logCommands, "log-commands", false, "logging all commands")
 	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
@@ -106,7 +106,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(VERSION)
+		fmt.Println(Version)
 		os.Exit(0)
 	}
 
@@ -175,10 +175,10 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, is
 			messageString := string(message)
 			messagesList := []string{}
 
-			if len(messageString) <= MAX_MESSAGE_LENGTH {
+			if len(messageString) <= MaxMessageLength {
 				messagesList = []string{messageString}
 			} else {
-				messagesList = splitStringLinesBySize(messageString, MAX_MESSAGE_LENGTH)
+				messagesList = splitStringLinesBySize(messageString, MaxMessageLength)
 			}
 
 			for _, messageChunk := range messagesList {
@@ -224,15 +224,15 @@ func main() {
 	}
 
 	users := NewUsers(appConfig)
-	messageSignal := make(chan BotMessage, MESSAGES_QUEUE_SIZE)
-	vacuumTicker := time.Tick(SECONDS_FOR_OLD_USERS_BEFORE_VACUUM * time.Second)
+	messageSignal := make(chan BotMessage, MessagesQueueSize)
+	vacuumTicker := time.Tick(SecondsForOldUsersBeforeVacuum * time.Second)
 	saveToBDTicker := make(<-chan time.Time)
 	exitSignal := make(chan struct{})
 	systemExitSignal := make(chan os.Signal)
 	signal.Notify(systemExitSignal, os.Interrupt, os.Kill)
 
 	if appConfig.persistentUsers {
-		saveToBDTicker = time.Tick(SECONDS_FOR_AUTO_SAVE_USERS_TO_DB * time.Second)
+		saveToBDTicker = time.Tick(SecondsForAutoSaveUsersToDB * time.Second)
 	}
 
 	var cacheTTL *cache.MemoryTTL

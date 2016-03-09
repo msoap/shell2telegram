@@ -205,7 +205,7 @@ func cmdShell2telegramRm(ctx Ctx) (replayMsg string) {
 
 // /shell2telegram version - get version
 func cmdShell2telegramVersion(ctx Ctx) (replayMsg string) {
-	replayMsg = fmt.Sprintf("shell2telegram %s", VERSION)
+	replayMsg = fmt.Sprintf("shell2telegram %s", Version)
 	return replayMsg
 }
 
