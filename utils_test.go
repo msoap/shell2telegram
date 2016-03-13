@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
@@ -294,5 +295,16 @@ func Test_getRandomCode(t *testing.T) {
 	rnd := getRandomCode()
 	if len(rnd) == 0 {
 		t.Errorf("getRandomCode() failed")
+	}
+}
+
+func Test_getOsUserHomeDir(t *testing.T) {
+	userDir := getOsUserHomeDir()
+	if len(userDir) == 0 {
+		t.Errorf("1. getOsUserHomeDir() failed")
+	}
+	_, err := os.Stat(userDir)
+	if err != nil {
+		t.Errorf("2. getOsUserHomeDir() failed")
 	}
 }
