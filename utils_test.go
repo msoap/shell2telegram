@@ -146,6 +146,45 @@ func Test_parseBotCommand(t *testing.T) {
 			},
 			errFunc: nil,
 		},
+		{
+			pathRaw:  "/:plain_text",
+			shellCmd: "ls",
+			// out
+			path: "/:plain_text",
+			command: Command{
+				shellCmd:    "ls",
+				description: "",
+				vars:        nil,
+				isMarkdown:  false,
+			},
+			errFunc: nil,
+		},
+		{
+			pathRaw:  "/:image",
+			shellCmd: "ls",
+			// out
+			path: "",
+			command: Command{
+				shellCmd:    "",
+				description: "",
+				vars:        nil,
+				isMarkdown:  false,
+			},
+			errFunc: fmt.Errorf("/:image not implemented"),
+		},
+		{
+			pathRaw:  "/:plain_text:desc=Name",
+			shellCmd: "ls",
+			// out
+			path: "/:plain_text",
+			command: Command{
+				shellCmd:    "ls",
+				description: "Name",
+				vars:        nil,
+				isMarkdown:  false,
+			},
+			errFunc: nil,
+		},
 	}
 
 	for _, item := range data {

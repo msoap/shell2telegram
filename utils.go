@@ -169,7 +169,7 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 		// /:plain_text, /:image, /:plain_text:desc=name
 		path = "/:" + pathParts[1]
 		if pathParts[1] == "image" {
-			log.Print("/:image not implemented")
+			return "", command, fmt.Errorf("/:image not implemented")
 		}
 		if len(pathParts) > 2 {
 			command, err = _parseAttr(pathParts[2:])
