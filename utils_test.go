@@ -250,3 +250,10 @@ func Test_splitStringLinesBySize(t *testing.T) {
 		}
 	}
 }
+
+func Test_getRandomCode(t *testing.T) {
+	rnd := getRandomCode()
+	if len(rnd) == 0 {
+		t.Errorf("getRandomCode() failed")
+	}
+}
