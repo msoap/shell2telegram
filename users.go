@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	tgbotapi "gopkg.in/telegram-bot-api.v1"
+	tgbotapi "gopkg.in/telegram-bot-api.v2"
 )
 
 // User - one telegram user who interact with bot

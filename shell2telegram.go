@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/koding/cache"
-	tgbotapi "gopkg.in/telegram-bot-api.v1"
+	tgbotapi "gopkg.in/telegram-bot-api.v2"
 )
 
 const (
