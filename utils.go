@@ -97,6 +97,7 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	return result
 }
 
+// errChain - handle errors on few functions
 func errChain(chainFuncs ...func() error) error {
 	for _, fn := range chainFuncs {
 		if err := fn(); err != nil {
