@@ -52,12 +52,17 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 				osExecCommand.Env = append(osExecCommand.Env, fmt.Sprintf("%s=%s", varsNames[i], arg))
 			}
 		} else {
-			// write user input to STDIN
-			stdin, err := osExecCommand.StdinPipe()
-			if err == nil {
-				io.WriteString(stdin, input)
-				stdin.Close()
-			} else {
+			var stdin io.WriteCloser
+			err := errChain(func() (err error) {
+				stdin, err = osExecCommand.StdinPipe()
+				return err
+			}, func() error {
+				_, err := io.WriteString(stdin, input)
+				return err
+			}, func() error {
+				return stdin.Close()
+			})
+			if err != nil {
 				log.Print("get STDIN error: ", err)
 			}
 		}
@@ -90,6 +95,16 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	}
 
 	return result
+}
+
+func errChain(chainFuncs ...func() error) error {
+	for _, fn := range chainFuncs {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // return 2 strings, second="" if string dont contain space
