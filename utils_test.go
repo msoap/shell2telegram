@@ -308,3 +308,36 @@ func Test_getOsUserHomeDir(t *testing.T) {
 		t.Errorf("2. getOsUserHomeDir() failed")
 	}
 }
+
+func Test_errChain(t *testing.T) {
+	err := errChain()
+	if err != nil {
+		t.Errorf("1. errChain() empty failed")
+	}
+
+	err = errChain(func() error { return nil })
+	if err != nil {
+		t.Errorf("2. errChain() failed")
+	}
+
+	err = errChain(func() error { return nil }, func() error { return nil })
+	if err != nil {
+		t.Errorf("3. errChain() failed")
+	}
+
+	err = errChain(func() error { return fmt.Errorf("error") })
+	if err == nil {
+		t.Errorf("4. errChain() failed")
+	}
+
+	err = errChain(func() error { return nil }, func() error { return fmt.Errorf("error") })
+	if err == nil {
+		t.Errorf("5. errChain() failed")
+	}
+
+	var1 := false
+	err = errChain(func() error { return fmt.Errorf("error") }, func() error { var1 = true; return nil })
+	if err == nil || var1 {
+		t.Errorf("6. errChain() failed")
+	}
+}
