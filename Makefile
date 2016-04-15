@@ -11,11 +11,12 @@ build:
 	go build
 
 test:
-	go test
+	go test -race -cover -v ./...
 
 lint:
-	golint | grep -v "don't use ALL_CAPS in Go names; use CamelCase" || true
-	go vet
+	golint ./...
+	go vet ./...
+	errcheck ./...
 
 update-from-github:
 	go get -u github.com/msoap/shell2telegram
