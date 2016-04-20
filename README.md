@@ -45,6 +45,7 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -persistent_users    : load/save users from file (default ~/.config/shell2telegram.json)
         -users_db=<FILENAME> : file for store users
         -cache=NNN           : caching command out for NNN seconds
+        -public              : bot is public (dont add /auth* commands)
         -version
         -help
 

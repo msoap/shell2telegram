@@ -74,10 +74,12 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 	}
 	sort.Strings(helpMsg)
 
-	helpMsg = append(helpMsg,
-		"/auth [code] → authorize user",
-		"/authroot [code] → authorize user as root",
-	)
+	if !ctx.appConfig.isPublicBot {
+		helpMsg = append(helpMsg,
+			"/auth [code] → authorize user",
+			"/authroot [code] → authorize user as root",
+		)
+	}
 
 	if ctx.users.IsRoot(ctx.userID) {
 		helpMsgForRoot := []string{

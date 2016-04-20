@@ -58,6 +58,7 @@ type Config struct {
 	persistentUsers        bool     // load/save users from file
 	usersDB                string   // file for store users
 	cache                  int      // caching command out (in seconds)
+	isPublicBot            bool     // bot is public (dont add /auth* commands)
 }
 
 // message types
@@ -88,6 +89,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.BoolVar(&appConfig.persistentUsers, "persistent_users", false, "load/save users from file (default ~/.config/shell2telegram.json)")
 	flag.StringVar(&appConfig.usersDB, "users_db", "", "file for store users")
 	flag.IntVar(&appConfig.cache, "cache", 0, "caching command out (in seconds)")
+	flag.BoolVar(&appConfig.isPublicBot, "public", false, "bot is public (dont add /auth* commands)")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
@@ -296,7 +298,7 @@ func main() {
 
 				switch {
 				// commands .................................
-				case messageCmd == "/auth" || messageCmd == "/authroot":
+				case !appConfig.isPublicBot && (messageCmd == "/auth" || messageCmd == "/authroot"):
 					replayMsg = cmdAuth(ctx)
 
 				case messageCmd == "/help":
