@@ -23,7 +23,7 @@ script:
   - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then $HOME/gopath/bin/goveralls -service=travis-ci || true; fi
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_GO_VERSION" = "1.6.2" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then
       docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker run --rm
         -v $PWD:/app/src/shell2telegram
