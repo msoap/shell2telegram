@@ -26,6 +26,21 @@ Or build from source:
     go get -u github.com/msoap/shell2telegram
     ln -s $GOPATH/bin/shell2telegram ~/bin/shell2telegram # or add $GOPATH/bin to $PATH
 
+Or build image and run with Docker.
+Example of `test-bot.Dockerfile` for bot who say current date:
+```
+FROM msoap/shell2telegram
+# may be install some alpine packages:
+# RUN apk add --no-cache ...
+ENV TB_TOKEN=*******
+CMD ["/date", "date"]
+```
+
+And build and run:
+
+    docker build -f test-bot.Dockerfile -t test-bot .
+    docker run --rm test-bot
+
 Usage
 -----
 
