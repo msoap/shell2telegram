@@ -1,5 +1,7 @@
 language: go
-sudo: false
+sudo: required
+services:
+  - docker
 
 go:
   - 1.5.3
@@ -9,6 +11,7 @@ go:
 before_install:
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
+  - docker pull golang:alpine
 
 install: go get -t ./...
 
@@ -18,3 +21,16 @@ script:
   - go vet ./...
   - diff <(gofmt -d .) <(echo -n "")
   - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then $HOME/gopath/bin/goveralls -service=travis-ci || true; fi
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_GO_VERSION" = "1.6.2" ]; then
+      docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+      docker run --rm \
+        -v $PWD:/app/src/shell2telegram \
+        -w /app/src/shell2telegram \
+        -e GOPATH=/app \
+        golang:alpine \
+        sh -c 'apk add --no-cache git; go get .; go build -o shell2telegram'
+      docker build -t msoap/shell2telegram .
+      docker push msoap/shell2telegram
+    fi
