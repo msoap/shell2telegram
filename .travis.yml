@@ -32,4 +32,5 @@ after_success:
         sh -c 'apk add --no-cache git; go get .; go build -o shell2telegram';
       docker build -t msoap/shell2telegram .;
       docker push msoap/shell2telegram;
+      rm $HOME/.docker/config.json;
     fi
