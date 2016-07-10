@@ -11,6 +11,7 @@ go:
 before_install:
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
+  - go get github.com/kisielk/errcheck
   - docker pull golang:alpine
 
 install: go get -t ./...
@@ -19,6 +20,7 @@ script:
   - go test -v ./...
   - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then go test -race -v ./...; fi
   - go vet ./...
+  - errcheck ./...
   - diff <(gofmt -d .) <(echo -n "")
   - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then $HOME/gopath/bin/goveralls -service=travis-ci || true; fi
 
