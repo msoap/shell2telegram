@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/msoap/shell2telegram.svg?branch=master)](https://travis-ci.org/msoap/shell2telegram)
 [![Coverage Status](https://coveralls.io/repos/github/msoap/shell2telegram/badge.svg?branch=master)](https://coveralls.io/github/msoap/shell2telegram?branch=master)
+[![Docker Pulls](https://img.shields.io/docker/pulls/msoap/shell2telegram.svg?maxAge=3600)](https://hub.docker.com/r/msoap/shell2telegram/)
 [![Homebrew formula exists](https://img.shields.io/badge/homebrew-🍺-d7af72.svg)](https://github.com/msoap/shell2telegram#install)
 [![Report Card](https://goreportcard.com/badge/github.com/msoap/shell2telegram)](https://goreportcard.com/report/github.com/msoap/shell2telegram)
 
