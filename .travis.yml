@@ -3,6 +3,10 @@ sudo: required
 services:
   - docker
 
+env:
+  global:
+    - CURRENT_GO_VERSION="1.6.2"
+
 go:
   - 1.5.3
   - 1.6.2
@@ -18,14 +22,16 @@ install: go get -t ./...
 
 script:
   - go test -v ./...
-  - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then go test -race -v ./...; fi
+  - if [ "$TRAVIS_GO_VERSION" = "$CURRENT_GO_VERSION" ]; then go test -race -v ./...; fi
   - go vet ./...
   - errcheck ./...
   - diff <(gofmt -d .) <(echo -n "")
-  - if [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then $HOME/gopath/bin/goveralls -service=travis-ci || true; fi
+  - if [ "$TRAVIS_GO_VERSION" = "$CURRENT_GO_VERSION" ]; then
+      $HOME/gopath/bin/goveralls -service=travis-ci || true;
+    fi
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_GO_VERSION" = "1.6.2" ]; then
+  - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_GO_VERSION" = "$CURRENT_GO_VERSION" ]; then
       docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$(echo $DOCKER_PASSWORD | base64 -d)";
       docker run --rm
         -v $PWD:/app/src/shell2telegram
