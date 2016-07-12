@@ -16,7 +16,7 @@ before_install:
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/kisielk/errcheck
-  - docker pull golang:alpine
+  - curl -SL https://github.com/grammarly/rocker/releases/download/1.2.0/rocker-1.2.0-linux_amd64.tar.gz | tar -xzC $GOPATH/bin
 
 install: go get -t ./...
 
@@ -32,14 +32,5 @@ script:
 
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_GO_VERSION" = "$CURRENT_GO_VERSION" ]; then
-      docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$(echo $DOCKER_PASSWORD | base64 -d)";
-      docker run --rm
-        -v $PWD:/app/src/shell2telegram
-        -w /app/src/shell2telegram
-        -e GOPATH=/app
-        golang:alpine
-        sh -c 'apk add --no-cache git; go get ./...; go build -o shell2telegram';
-      docker build -t msoap/shell2telegram .;
-      docker push msoap/shell2telegram;
-      rm $HOME/.docker/config.json;
+      rocker build --auth "$DOCKER_USERNAME:$(echo $DOCKER_PASSWORD | base64 -d)" --pull --meta --push;
     fi
