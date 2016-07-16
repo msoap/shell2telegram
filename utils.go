@@ -40,9 +40,7 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	osExecCommand.Stderr = os.Stderr
 
 	// copy variables from parent process
-	for _, envRaw := range os.Environ() {
-		osExecCommand.Env = append(osExecCommand.Env, envRaw)
-	}
+	osExecCommand.Env = append(osExecCommand.Env, os.Environ()...)
 
 	if input != "" {
 		if len(varsNames) > 0 {
