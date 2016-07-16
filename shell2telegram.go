@@ -305,7 +305,8 @@ func main() {
 					replayMsg = cmdHelp(ctx)
 
 				case messageCmd == "/shell2telegram" && users.IsRoot(userID):
-					messageSubCmd, messageArgs := splitStringHalfBySpace(messageArgs)
+					messageSubCmd := ""
+					messageSubCmd, messageArgs = splitStringHalfBySpace(messageArgs)
 					ctx.messageArgs = messageArgs
 					if cmdHandler, ok := internalCommands[messageSubCmd]; ok {
 						replayMsg = cmdHandler(ctx)
