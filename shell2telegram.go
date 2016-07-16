@@ -48,16 +48,16 @@ type Commands map[string]Command
 // Config - config struct
 type Config struct {
 	token                  string   // bot token
-	addExit                bool     // adding /shell2telegram exit command
 	botTimeout             int      // bot timeout
 	predefinedAllowedUsers []string // telegram users who are allowed to chat with the bot
 	predefinedRootUsers    []string // telegram users, who confirms new users in their private chat
-	allowAll               bool     // allow all user (DANGEROUS!)
-	logCommands            bool     // logging all commands
 	description            string   // description of bot
-	persistentUsers        bool     // load/save users from file
 	usersDB                string   // file for store users
 	cache                  int      // caching command out (in seconds)
+	addExit                bool     // adding /shell2telegram exit command
+	allowAll               bool     // allow all user (DANGEROUS!)
+	logCommands            bool     // logging all commands
+	persistentUsers        bool     // load/save users from file
 	isPublicBot            bool     // bot is public (dont add /auth* commands)
 }
 
@@ -69,11 +69,11 @@ const (
 
 // BotMessage - record for send via channel for send message to telegram chat
 type BotMessage struct {
-	chatID      int
-	messageType int8
 	message     string
 	fileName    string
 	photo       []byte
+	chatID      int
+	messageType int8
 	isMarkdown  bool
 }
 
