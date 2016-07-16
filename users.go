@@ -191,7 +191,7 @@ func (users Users) StringVerbose(userID int) string {
 func (users *Users) ClearOldUsers() {
 	for id, user := range users.list {
 		if !user.IsAuthorized && !user.IsRoot && user.Counter == 0 &&
-			time.Now().Sub(user.LastAccessTime).Seconds() > SecondsForOldUsersBeforeVacuum {
+			time.Since(user.LastAccessTime).Seconds() > SecondsForOldUsersBeforeVacuum {
 			log.Printf("Vacuum: %d, %s", id, users.String(id))
 			delete(users.list, id)
 			users.needSaveDB = true
