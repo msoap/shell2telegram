@@ -16,7 +16,7 @@ before_install:
   - go get github.com/mattn/goveralls
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/kisielk/errcheck
-  - curl -SL https://github.com/grammarly/rocker/releases/download/1.2.0/rocker-1.2.0-linux_amd64.tar.gz | tar -xzC $GOPATH/bin
+  - curl -SL https://github.com/grammarly/rocker/releases/download/1.3.0/rocker_linux_amd64.tar.gz | tar -xzC $GOPATH/bin
 
 install: go get -t ./...
 
