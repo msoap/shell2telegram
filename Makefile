@@ -20,3 +20,6 @@ lint:
 
 update-from-github:
 	go get -u github.com/msoap/shell2telegram
+
+build-docker-image:
+	rocker build
