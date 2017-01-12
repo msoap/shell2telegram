@@ -41,7 +41,7 @@ And build and run:
 
     docker build -f test-bot.Dockerfile -t test-bot .
     docker run --rm test-bot
-    # or ru with set token from command line
+    # or run with set token from command line
     docker run -e TB_TOKEN=******* --rm test-bot
 
 Usage
