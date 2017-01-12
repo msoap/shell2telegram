@@ -12,6 +12,7 @@ EXPORT shell2telegram
 # result image with binary only
 FROM alpine
 
+RUN apk add --no-cache ca-certificates
 RUN mkdir /app
 IMPORT shell2telegram /app/shell2telegram
 ENTRYPOINT ["/app/shell2telegram"]
