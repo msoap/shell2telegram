@@ -1,6 +1,5 @@
 FROM msoap/shell2telegram
 
-# may be install some alpine packages:
-# RUN apk add --no-cache ...
+RUN apk add --no-cache ca-certificates
 ENV TB_TOKEN=*******
 CMD ["/date", "date"]
