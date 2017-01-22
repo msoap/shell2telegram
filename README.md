@@ -16,7 +16,7 @@ MacOS:
     brew tap msoap/tools
     brew install shell2telegram
     # update:
-    brew update; brew upgrade shell2telegram
+    brew upgrade shell2telegram
 
 Or download binaries from: [releases](https://github.com/msoap/shell2telegram/releases) (OS X/Linux/Windows/RaspberryPi)
 
