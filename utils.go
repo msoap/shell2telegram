@@ -127,8 +127,7 @@ func getRandomCode() string {
 	buffer := make([]byte, codeBytesLength)
 	_, err := rand.Read(buffer)
 	if err != nil {
-		log.Print("Get code error: ", err)
-		return ""
+		log.Fatalf("Get code error: %s", err)
 	}
 
 	return base64.URLEncoding.EncodeToString(buffer)
