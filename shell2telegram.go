@@ -32,6 +32,9 @@ const (
 
 	// DBFileName - DB json name
 	DBFileName = "shell2telegram.json"
+
+	// shell2telegram command name for get plain text without /command
+	cmdPlainText = "/:plain_text"
 )
 
 // Command - one user command
@@ -266,17 +269,17 @@ func main() {
 			if len(allUserMessage) > 0 && allUserMessage[0] == '/' {
 				messageCmd, messageArgs = splitStringHalfBySpace(allUserMessage)
 			} else {
-				messageCmd, messageArgs = "/:plain_text", allUserMessage
+				messageCmd, messageArgs = cmdPlainText, allUserMessage
 			}
 
 			allowPlainText := false
-			if _, ok := commands["/:plain_text"]; ok {
+			if _, ok := commands[cmdPlainText]; ok {
 				allowPlainText = true
 			}
 
 			replayMsg := ""
 
-			if len(messageCmd) > 0 && (messageCmd != "/:plain_text" || allowPlainText) {
+			if len(messageCmd) > 0 && (messageCmd != cmdPlainText || allowPlainText) {
 
 				users.AddNew(telegramUpdate.Message)
 				userID := telegramUpdate.Message.From.ID
@@ -314,7 +317,7 @@ func main() {
 						replayMsg = "Sub-command not found"
 					}
 
-				case allowExec && (allowPlainText && messageCmd == "/:plain_text" || messageCmd[0] == '/'):
+				case allowExec && (allowPlainText && messageCmd == cmdPlainText || messageCmd[0] == '/'):
 					cmdUser(ctx)
 
 				} // switch for commands
