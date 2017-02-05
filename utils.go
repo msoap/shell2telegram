@@ -36,7 +36,7 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	if runtime.GOOS == "windows" {
 		shell, params = "cmd", []string{"/C", shellCmd}
 	}
-	osExecCommand := exec.Command(shell, params...)
+	osExecCommand := exec.Command(shell, params...) // #nosec
 	osExecCommand.Stderr = os.Stderr
 
 	// copy variables from parent process
@@ -252,8 +252,7 @@ func getOsUserHomeDir() string {
 }
 
 // read default or user db file name
-func getDBFilePath(usersDBFile string, needCreateDir bool) string {
-	fileName := ""
+func getDBFilePath(usersDBFile string, needCreateDir bool) (fileName string) {
 	if usersDBFile == "" {
 		dirName := getOsUserHomeDir() + string(os.PathSeparator) + ".config"
 		if needCreateDir {

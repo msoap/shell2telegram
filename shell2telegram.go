@@ -156,7 +156,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 // ----------------------------------------------------------------------------
 func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, isMarkdown bool) {
 	go func() {
-		fileName := ""
+		var fileName string
 		fileType := http.DetectContentType(message)
 		switch fileType {
 		case "image/png":
@@ -175,7 +175,7 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, is
 
 			// is text message
 			messageString := string(message)
-			messagesList := []string{}
+			var messagesList []string
 
 			if len(messageString) <= MaxMessageLength {
 				messagesList = []string{messageString}
@@ -305,7 +305,7 @@ func main() {
 					replayMsg = cmdHelp(ctx)
 
 				case messageCmd == "/shell2telegram" && users.IsRoot(userID):
-					messageSubCmd := ""
+					var messageSubCmd string
 					messageSubCmd, messageArgs = splitStringHalfBySpace(messageArgs)
 					ctx.messageArgs = messageArgs
 					if cmdHandler, ok := internalCommands[messageSubCmd]; ok {
