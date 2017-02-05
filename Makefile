@@ -23,3 +23,6 @@ update-from-github:
 
 build-docker-image:
 	rocker build
+
+gometalinter:
+	gometalinter --vendor --cyclo-over=25 --line-length=150 --dupl-threshold=150 --min-occurrences=3 --enable=misspell --deadline=10m
