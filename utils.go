@@ -235,7 +235,7 @@ func splitStringLinesBySize(input string, maxSize int) []string {
 // create dir if it is not exists
 func createDirIfNeed(dir string) {
 	if _, err := os.Stat(dir); err != nil {
-		err = os.MkdirAll(dir, 0755)
+		err = os.MkdirAll(dir, 0700)
 		if err != nil {
 			log.Fatal("create dir error:", dir)
 		}
