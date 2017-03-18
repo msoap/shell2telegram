@@ -1,4 +1,5 @@
-#<img src="https://raw.githubusercontent.com/msoap/shell2telegram/misc/img/shell2telegram_icon.png" width="32" height="32"> shell2telegram
+<img src="https://raw.githubusercontent.com/msoap/shell2telegram/misc/img/shell2telegram_icon.png" width="32" height="32"> shell2telegram
+-----------------------------------------------------------------------------------------------------------------------------------------
 
 [![Build Status](https://travis-ci.org/msoap/shell2telegram.svg?branch=master)](https://travis-ci.org/msoap/shell2telegram)
 [![Coverage Status](https://coveralls.io/repos/github/msoap/shell2telegram/badge.svg?branch=master)](https://coveralls.io/github/msoap/shell2telegram?branch=master)
