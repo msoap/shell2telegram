@@ -13,22 +13,22 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/koding/cache"
+	"github.com/msoap/raphanus"
+	raphanuscommon "github.com/msoap/raphanus/common"
 )
 
 // codeBytesLength - length of random code in bytes
 const codeBytesLength = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cacheTTL *cache.MemoryTTL) (result []byte) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cache *raphanus.DB, cacheTTL int) (result []byte) {
 	cacheKey := shellCmd + "/" + input
-	if cacheTTL != nil {
-		cacheData, err := cacheTTL.Get(cacheKey)
-		if err != cache.ErrNotFound && err != nil {
-			log.Print(err)
+	if cacheTTL > 0 {
+		if cacheData, err := cache.GetBytes(cacheKey); err != raphanuscommon.ErrKeyNotExists && err != nil {
+			log.Printf("get from cache failed: %s", err)
 		} else if err == nil {
 			// cache hit
-			return cacheData.([]byte)
+			return cacheData
 		}
 	}
 
@@ -85,10 +85,9 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 		result = shellOut
 	}
 
-	if cacheTTL != nil {
-		err := cacheTTL.Set(cacheKey, result)
-		if err != nil {
-			log.Print(err)
+	if cacheTTL > 0 {
+		if err := cache.SetBytes(cacheKey, result, cacheTTL); err != nil {
+			log.Printf("set to cache failed: %s", err)
 		}
 	}
 

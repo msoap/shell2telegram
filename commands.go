@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/koding/cache"
+	"github.com/msoap/raphanus"
 )
 
 // Ctx - context for bot command function (users, command, args, ...)
@@ -21,7 +21,8 @@ type Ctx struct {
 	messageSignal chan<- BotMessage // for send telegram messages
 	chatID        int               // chat for send replay
 	exitSignal    chan<- struct{}   // for signal for terminate bot
-	cacheTTL      *cache.MemoryTTL  // cache for commands output
+	cache         *raphanus.DB      // cache for commands output
+	cacheTTL      int               // cache timeout
 }
 
 // /auth and /authroot - authorize users
@@ -124,6 +125,7 @@ func cmdUser(ctx Ctx) {
 				ctx.chatID,
 				ctx.users.list[ctx.userID].UserName,
 				ctx.users.list[ctx.userID].FirstName+" "+ctx.users.list[ctx.userID].LastName,
+				ctx.cache,
 				ctx.cacheTTL,
 			)
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw, cmd.isMarkdown)
