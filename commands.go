@@ -127,6 +127,7 @@ func cmdUser(ctx Ctx) {
 				ctx.users.list[ctx.userID].FirstName+" "+ctx.users.list[ctx.userID].LastName,
 				ctx.cache,
 				ctx.cacheTTL,
+				ctx.appConfig.shTimeout,
 			)
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw, cmd.isMarkdown)
 		}()

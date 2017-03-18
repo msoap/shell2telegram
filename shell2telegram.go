@@ -57,6 +57,7 @@ type Config struct {
 	description            string   // description of bot
 	usersDB                string   // file for store users
 	cache                  int      // caching command out (in seconds)
+	shTimeout              int      // timeout for execute shell command (in seconds)
 	addExit                bool     // adding /shell2telegram exit command
 	allowAll               bool     // allow all user (DANGEROUS!)
 	logCommands            bool     // logging all commands
@@ -93,6 +94,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.StringVar(&appConfig.usersDB, "users_db", "", "file for store users")
 	flag.IntVar(&appConfig.cache, "cache", 0, "caching command out (in seconds)")
 	flag.BoolVar(&appConfig.isPublicBot, "public", false, "bot is public (dont add /auth* commands)")
+	flag.IntVar(&appConfig.shTimeout, "sh-timeout", 0, "set timeout for execute shell command (in seconds)")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
