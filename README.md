@@ -59,12 +59,13 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -add-exit            : adding "/shell2telegram exit" command for terminate bot (for roots only)
         -log-commands        : logging all commands
         -tb-token=<TOKEN>    : setting bot token (or set TB_TOKEN variable)
-        -timeout=<NN>        : setting timeout for bot (default 60 sec)
+        -timeout=N           : setting timeout for bot (default 60 sec)
         -description=<TITLE> : setting description of bot
         -persistent_users    : load/save users from file (default ~/.config/shell2telegram.json)
         -users_db=<FILENAME> : file for store users
-        -cache=NNN           : caching command out for NNN seconds
+        -cache=N             : caching command out for N seconds
         -public              : bot is public (dont add /auth* commands)
+        -sh-timeout=N	     : set timeout for execute shell command (in seconds)
         -version
         -help
 

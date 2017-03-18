@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/msoap/raphanus"
 	raphanuscommon "github.com/msoap/raphanus/common"
@@ -21,7 +23,7 @@ import (
 const codeBytesLength = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cache *raphanus.DB, cacheTTL int) (result []byte) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cache *raphanus.DB, cacheTTL int, shTimeout int) (result []byte) {
 	cacheKey := shellCmd + "/" + input
 	if cacheTTL > 0 {
 		if cacheData, err := cache.GetBytes(cacheKey); err != raphanuscommon.ErrKeyNotExists && err != nil {
@@ -36,7 +38,15 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 	if runtime.GOOS == "windows" {
 		shell, params = "cmd", []string{"/C", shellCmd}
 	}
-	osExecCommand := exec.Command(shell, params...) // #nosec
+
+	ctx := context.Background()
+	if shTimeout > 0 {
+		var cancelFn context.CancelFunc
+		ctx, cancelFn = context.WithTimeout(ctx, time.Duration(shTimeout)*time.Second)
+		defer cancelFn()
+	}
+
+	osExecCommand := exec.CommandContext(ctx, shell, params...) // #nosec
 	osExecCommand.Stderr = os.Stderr
 
 	// copy variables from parent process
