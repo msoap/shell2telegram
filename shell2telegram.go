@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/koding/cache"
+	"github.com/msoap/raphanus"
 	tgbotapi "gopkg.in/telegram-bot-api.v2"
 )
 
@@ -149,7 +149,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 
 	if appConfig.token == "" {
 		if appConfig.token = os.Getenv("TB_TOKEN"); appConfig.token == "" {
-			return commands, appConfig, fmt.Errorf("TB_TOKEN environment var not found. See https://core.telegram.org/bots#botfather for more information\n")
+			return commands, appConfig, fmt.Errorf("TB_TOKEN environment var not found. See https://core.telegram.org/bots#botfather for more information")
 		}
 	}
 
@@ -240,10 +240,9 @@ func main() {
 		saveToBDTicker = time.Tick(SecondsForAutoSaveUsersToDB * time.Second)
 	}
 
-	var cacheTTL *cache.MemoryTTL
+	var cache raphanus.DB
 	if appConfig.cache > 0 {
-		cacheTTL = cache.NewMemoryWithTTL(time.Duration(appConfig.cache) * time.Second)
-		cacheTTL.StartGC(time.Duration(appConfig.cache) * time.Second * 2)
+		cache = raphanus.New("", 0)
 	}
 
 	// all /shell2telegram sub-commands handlers
@@ -296,7 +295,7 @@ func main() {
 					messageSignal: messageSignal,
 					chatID:        telegramUpdate.Message.Chat.ID,
 					exitSignal:    exitSignal,
-					cacheTTL:      cacheTTL,
+					cache:         &cache,
 				}
 
 				switch {
