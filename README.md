@@ -30,13 +30,12 @@ Or build from source:
 
 Or build image and run with Docker.
 Example of `test-bot.Dockerfile` for bot who say current date:
-```
-FROM msoap/shell2telegram
-# may be install some alpine packages:
-# RUN apk add --no-cache ...
-ENV TB_TOKEN=*******
-CMD ["/date", "date"]
-```
+
+    FROM msoap/shell2telegram
+    # may be install some alpine packages:
+    # RUN apk add --no-cache ...
+    ENV TB_TOKEN=*******
+    CMD ["/date", "date"]
 
 And build and run:
 
