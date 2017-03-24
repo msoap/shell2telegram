@@ -5,6 +5,7 @@ services:
 
 env:
   global:
+    - APP_NAME=shell2telegram
     - CURRENT_GO_VERSION="1.8"
 
 go:
@@ -33,3 +34,26 @@ after_success:
   - if [[ $TRAVIS_BRANCH == "master" ]] && [[ $TRAVIS_GO_VERSION =~ $CURRENT_GO_VERSION ]] && [[ $TRAVIS_EVENT_TYPE == "push" ]]; then
       rocker build --auth "$DOCKER_USERNAME:$(echo $DOCKER_PASSWORD | base64 -d)" --pull --meta --push;
     fi
+
+before_deploy:
+  - curl -SL https://raw.githubusercontent.com/msoap/etc/master/golang-cross-build/golang-cross-build.sh > $GOPATH/bin/golang-cross-build.sh
+  - chmod 700 $GOPATH/bin/golang-cross-build.sh
+  - gem install --no-ri --no-rdoc fpm
+  - golang-cross-build.sh $APP_NAME
+  - ls -l *.zip *.tar.gz *.deb
+
+deploy:
+  provider: releases
+  api_key:
+    secure: HP4lWsw8rLlRAkn0IA1+P4kF51m46f4n0h40juyIs6eJc/lrvu2jlHZxUxt2mlFU2f69vO/ycrfZB7z3A9ULX6Q0g9AFXy9/WbYEbIFj7CxBzcbpoIIN5uTNkUksrcsqLHGRbAbd4o2bstdYfxA/n6I1lO3Rn0sV1oT0BNE27raaLX2AUBVCuVW1AYyCsHKeaOHFjytp1aChk5yQ2xNmBYn4a+yfm37yGNZhG1FiNvpcma4CgZtB3cxO8+q31pwc5M77efIftGfQVmSPvS+r+m45iXlM9UuPaKDzomq2rKEGtQjlRYjy/17ghkElfAmHE8wZGZIa1qK/kRW8EKbl2AlIR3GY5egIQmr36acuB7hDoDJyEZW/q4i0DX+6Kcvx5zO4BLmzkyKSbtvzTLTGkNYcDBDQKHEnxTpkOG0Eted5mn2DeEHgJzIpcj2GsX8JLsChbyswW6bv24blRtphxrpGrZ5HtnVNxKJ9NLDYzYVdadFH+X4+dPxmBNKI6Ust/p0mCsuYaYKQLaMeuqsxI233hC2Riu01tAJcSCoh/8PnKJIZdNL8z7c0h2j60yH3KXnjenknD8Z5lZk6hX5arZ0czZermfnSffj3U/4Ubp8gL3oMwsU+mXTpH/oQXQSqci9Y+SbfgjeBNfjDOenQqbtX4BjMFotO3R3F3LwE9Xg=
+  file_glob: "true"
+  file:
+    - "*.zip"
+    - "*.tar.gz"
+    - "*.deb"
+  skip_cleanup: true
+  on:
+    tags: true
+    branch: master
+    condition: $TRAVIS_GO_VERSION =~ $CURRENT_GO_VERSION
+    repo: msoap/$APP_NAME
