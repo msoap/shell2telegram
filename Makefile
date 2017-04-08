@@ -28,7 +28,9 @@ update-from-github:
 	go get -u github.com/msoap/$(APP_NAME)
 
 build-docker-image:
-	rocker build
+	docker run --rm -v $$PWD:/go/src/$(APP_NAME) -w /go/src/$(APP_NAME) golang:alpine sh -c "apk add --no-cache git && go get ./... && go build -o $(APP_NAME)"
+	docker build -t msoap/$(APP_NAME):latest .
+	rm $(APP_NAME)
 
 gometalinter:
 	gometalinter --vendor --cyclo-over=25 --line-length=150 --dupl-threshold=150 --min-occurrences=3 --enable=misspell --deadline=10m --exclude=SA1022
