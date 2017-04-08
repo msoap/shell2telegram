@@ -44,6 +44,8 @@ And build and run:
     # or run with set token from command line
     docker run -e TB_TOKEN=******* --rm test-bot
 
+Mirror docker [repository](https://quay.io/repository/msoap/shell2telegram): `quay.io/msoap/shell2telegram:latest`
+
 Usage
 -----
 
