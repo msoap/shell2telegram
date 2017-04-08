@@ -235,8 +235,8 @@ func main() {
 	vacuumTicker := time.Tick(SecondsForOldUsersBeforeVacuum * time.Second)
 	saveToBDTicker := make(<-chan time.Time)
 	exitSignal := make(chan struct{})
-	systemExitSignal := make(chan os.Signal)
-	signal.Notify(systemExitSignal, os.Interrupt, os.Kill)
+	systemExitSignal := make(chan os.Signal, 1)
+	signal.Notify(systemExitSignal, os.Interrupt)
 
 	if appConfig.persistentUsers {
 		saveToBDTicker = time.Tick(SecondsForAutoSaveUsersToDB * time.Second)

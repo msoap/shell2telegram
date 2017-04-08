@@ -31,7 +31,7 @@ build-docker-image:
 	rocker build
 
 gometalinter:
-	gometalinter --vendor --cyclo-over=25 --line-length=150 --dupl-threshold=150 --min-occurrences=3 --enable=misspell --deadline=10m
+	gometalinter --vendor --cyclo-over=25 --line-length=150 --dupl-threshold=150 --min-occurrences=3 --enable=misspell --deadline=10m --exclude=SA1022
 
 generate-manpage:
 	cat README.md | grep -v "^\[" | perl -pe 's/\<img.+\>//' > $(APP_NAME).md
