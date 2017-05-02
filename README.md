@@ -67,6 +67,7 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -cache=N             : caching command out for N seconds
         -public              : bot is public (dont add /auth* commands)
         -sh-timeout=N        : set timeout for execute shell command (in seconds)
+        -shell="shell"       : shell for execute command, "" - without shell (default "sh")
         -version
         -help
 

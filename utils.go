@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	shellwords "github.com/mattn/go-shellwords"
 	"github.com/msoap/raphanus"
 	raphanuscommon "github.com/msoap/raphanus/common"
 )
@@ -23,7 +24,7 @@ import (
 const codeBytesLength = 15
 
 // exec shell commands with text to STDIN
-func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cache *raphanus.DB, cacheTTL int, shTimeout int) (result []byte) {
+func execShell(shellCmd, input string, varsNames []string, userID, chatID int, userName, userDisplayName string, cache *raphanus.DB, cacheTTL int, config *Config) (result []byte) {
 	cacheKey := shellCmd + "/" + input
 	if cacheTTL > 0 {
 		if cacheData, err := cache.GetBytes(cacheKey); err != raphanuscommon.ErrKeyNotExists && err != nil {
@@ -34,15 +35,16 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 		}
 	}
 
-	shell, params := "sh", []string{"-c", shellCmd}
-	if runtime.GOOS == "windows" {
-		shell, params = "cmd", []string{"/C", shellCmd}
+	shell, params, err := getShellAndParams(shellCmd, config.shell, runtime.GOOS == "windows")
+	if err != nil {
+		log.Print("parse shell failed: ", err)
+		return nil
 	}
 
 	ctx := context.Background()
-	if shTimeout > 0 {
+	if config.shTimeout > 0 {
 		var cancelFn context.CancelFunc
-		ctx, cancelFn = context.WithTimeout(ctx, time.Duration(shTimeout)*time.Second)
+		ctx, cancelFn = context.WithTimeout(ctx, time.Duration(config.shTimeout)*time.Second)
 		defer cancelFn()
 	}
 
@@ -61,16 +63,16 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 			}
 		} else {
 			var stdin io.WriteCloser
-			err := errChain(func() (err error) {
+			errExec := errChain(func() (err error) {
 				stdin, err = osExecCommand.StdinPipe()
 				return err
 			}, func() error {
-				_, err := io.WriteString(stdin, input)
+				_, err = io.WriteString(stdin, input)
 				return err
 			}, func() error {
 				return stdin.Close()
 			})
-			if err != nil {
+			if errExec != nil {
 				log.Print("get STDIN error: ", err)
 			}
 		}
@@ -273,4 +275,28 @@ func getDBFilePath(usersDBFile string, needCreateDir bool) (fileName string) {
 	}
 
 	return fileName
+}
+
+// ------------------------------------------------------------------
+// getShellAndParams - get default shell and command
+func getShellAndParams(cmd string, customShell string, isWindows bool) (shell string, params []string, err error) {
+	shell, params = "sh", []string{"-c", cmd}
+	if isWindows {
+		shell, params = "cmd", []string{"/C", cmd}
+	}
+
+	// custom shell
+	switch {
+	case customShell != "sh" && customShell != "":
+		shell = customShell
+	case customShell == "":
+		cmdLine, err := shellwords.Parse(cmd)
+		if err != nil {
+			return shell, params, fmt.Errorf("Parse '%s' failed: %s", cmd, err)
+		}
+
+		shell, params = cmdLine[0], cmdLine[1:]
+	}
+
+	return shell, params, nil
 }
