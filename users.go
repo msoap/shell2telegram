@@ -280,6 +280,7 @@ func (users *Users) LoadFromDB(usersDBFile string) {
 	if err == nil {
 		if err = json.Unmarshal(usersJSON, &usersList); err == nil {
 			for _, user := range usersList.Users {
+				user := user
 				users.list[user.UserID] = &user
 			}
 		}
