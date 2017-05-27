@@ -3,6 +3,7 @@ FROM golang:alpine as go_builder
 
 RUN apk add --no-cache git
 
+ENV CGO_ENABLED=0
 RUN go get -v github.com/msoap/shell2telegram
 RUN cd /go/src/github.com/msoap/shell2telegram && go install -a -v -ldflags="-w -s" ./...
 
