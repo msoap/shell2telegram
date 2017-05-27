@@ -286,7 +286,7 @@ func (users *Users) LoadFromDB(usersDBFile string) {
 		}
 	}
 	if err == nil {
-		log.Printf("Loaded usersDB json from: %s", fileNamePath)
+		log.Printf("Loaded usersDB json from: %s, %d users", fileNamePath, len(usersList.Users))
 	} else {
 		log.Printf("Load usersDB (%s) error: %s", fileNamePath, err)
 	}
