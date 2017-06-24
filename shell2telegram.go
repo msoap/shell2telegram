@@ -246,7 +246,7 @@ func main() {
 
 	var cache raphanus.DB
 	if appConfig.cache > 0 {
-		cache = raphanus.New("", 0)
+		cache = raphanus.New()
 	}
 
 	// all /shell2telegram sub-commands handlers
