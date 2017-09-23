@@ -5,24 +5,26 @@ import (
 	"log"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/msoap/raphanus"
 )
 
 // Ctx - context for bot command function (users, command, args, ...)
 type Ctx struct {
-	appConfig     *Config           // configuration
-	users         *Users            // all users
-	commands      Commands          // all chat commands
-	userID        int               // current user
-	allowExec     bool              // is user authorized
-	messageCmd    string            // command name
-	messageArgs   string            // command arguments
-	messageSignal chan<- BotMessage // for send telegram messages
-	chatID        int               // chat for send replay
-	exitSignal    chan<- struct{}   // for signal for terminate bot
-	cache         *raphanus.DB      // cache for commands output
-	cacheTTL      int               // cache timeout
+	appConfig      *Config           // configuration
+	users          *Users            // all users
+	commands       Commands          // all chat commands
+	userID         int               // current user
+	allowExec      bool              // is user authorized
+	messageCmd     string            // command name
+	messageArgs    string            // command arguments
+	messageSignal  chan<- BotMessage // for send telegram messages
+	chatID         int               // chat for send replay
+	exitSignal     chan<- struct{}   // for signal for terminate bot
+	cache          *raphanus.DB      // cache for commands output
+	cacheTTL       int               // cache timeout
+	oneThreadMutex *sync.Mutex       // mutex for run shell commands in one thread
 }
 
 // /auth and /authroot - authorize users
@@ -117,6 +119,9 @@ func cmdHelp(ctx Ctx) (replayMsg string) {
 func cmdUser(ctx Ctx) {
 	if cmd, found := ctx.commands[ctx.messageCmd]; found {
 		go func() {
+			if ctx.appConfig.oneThread {
+				ctx.oneThreadMutex.Lock()
+			}
 			replayMsgRaw := execShell(
 				cmd.shellCmd,
 				ctx.messageArgs,
@@ -129,6 +134,10 @@ func cmdUser(ctx Ctx) {
 				ctx.cacheTTL,
 				ctx.appConfig,
 			)
+			if ctx.appConfig.oneThread {
+				ctx.oneThreadMutex.Unlock()
+			}
+
 			sendMessage(ctx.messageSignal, ctx.chatID, replayMsgRaw, cmd.isMarkdown)
 		}()
 	}

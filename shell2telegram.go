@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/msoap/raphanus"
@@ -64,6 +65,7 @@ type Config struct {
 	logCommands            bool     // logging all commands
 	persistentUsers        bool     // load/save users from file
 	isPublicBot            bool     // bot is public (dont add /auth* commands)
+	oneThread              bool     // run each shell commands in one thread
 }
 
 // message types
@@ -97,6 +99,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.BoolVar(&appConfig.isPublicBot, "public", false, "bot is public (dont add /auth* commands)")
 	flag.IntVar(&appConfig.shTimeout, "sh-timeout", 0, "set timeout for execute shell command (in seconds)")
 	flag.StringVar(&appConfig.shell, "shell", "sh", "custom shell or \"\" for execute without shell")
+	flag.BoolVar(&appConfig.oneThread, "one-thread", false, "run each shell command in one thread")
 	logFilename := flag.String("log", "", "log filename, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
@@ -236,6 +239,7 @@ func main() {
 	messageSignal := make(chan BotMessage, MessagesQueueSize)
 	vacuumTicker := time.Tick(SecondsForOldUsersBeforeVacuum * time.Second)
 	saveToBDTicker := make(<-chan time.Time)
+	oneThreadMutex := sync.Mutex{}
 	exitSignal := make(chan struct{})
 	systemExitSignal := make(chan os.Signal, 1)
 	signal.Notify(systemExitSignal, os.Interrupt)
@@ -289,17 +293,18 @@ func main() {
 				allowExec := appConfig.allowAll || users.IsAuthorized(userID)
 
 				ctx := Ctx{
-					appConfig:     &appConfig,
-					users:         &users,
-					commands:      commands,
-					userID:        userID,
-					allowExec:     allowExec,
-					messageCmd:    messageCmd,
-					messageArgs:   messageArgs,
-					messageSignal: messageSignal,
-					chatID:        telegramUpdate.Message.Chat.ID,
-					exitSignal:    exitSignal,
-					cache:         &cache,
+					appConfig:      &appConfig,
+					users:          &users,
+					commands:       commands,
+					userID:         userID,
+					allowExec:      allowExec,
+					messageCmd:     messageCmd,
+					messageArgs:    messageArgs,
+					messageSignal:  messageSignal,
+					chatID:         telegramUpdate.Message.Chat.ID,
+					exitSignal:     exitSignal,
+					cache:          &cache,
+					oneThreadMutex: &oneThreadMutex,
 				}
 
 				switch {
