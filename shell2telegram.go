@@ -182,7 +182,6 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, is
 		}
 
 		if fileName == "message" {
-
 			// is text message
 			messageString := string(message)
 			var messagesList []string
