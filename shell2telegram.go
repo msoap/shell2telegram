@@ -17,7 +17,7 @@ import (
 
 const (
 	// Version - current version
-	Version = "1.6"
+	Version = "1.7"
 
 	// DefaultBotTimeout - bot default timeout
 	DefaultBotTimeout = 60
