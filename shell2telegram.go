@@ -350,7 +350,7 @@ func main() {
 			}
 
 			if err != nil {
-				log.Print("Bot send message error: ", err)
+				log.Printf("failed to send message: %s", err)
 			}
 
 		case <-saveToBDTicker:
