@@ -292,7 +292,7 @@ func getShellAndParams(cmd string, customShell string, isWindows bool) (shell st
 	case customShell == "":
 		cmdLine, err := shellwords.Parse(cmd)
 		if err != nil {
-			return shell, params, fmt.Errorf("failed parse %q: %s", cmd, err)
+			return shell, params, fmt.Errorf("failed to parse %q: %s", cmd, err)
 		}
 
 		shell, params = cmdLine[0], cmdLine[1:]
