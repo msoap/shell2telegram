@@ -153,7 +153,7 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 		return "", command, fmt.Errorf("error: shell command cannot be empty")
 	}
 
-	_parseAttr := func(varsParts []string) (command Command, err error) {
+	parseAttrFn := func(varsParts []string) (command Command, err error) {
 		for _, oneVar := range varsParts {
 			oneVarParts := regexp.MustCompile("=").Split(oneVar, 2)
 			if len(oneVarParts) == 1 && oneVarParts[0] == "md" {
@@ -196,12 +196,12 @@ func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, er
 			return "", command, fmt.Errorf("/:image not implemented")
 		}
 		if len(pathParts) > 2 {
-			command, err = _parseAttr(pathParts[2:])
+			command, err = parseAttrFn(pathParts[2:])
 		}
 	case len(pathParts) > 1:
 		// commands with modificators :desc, :vars
 		path = pathParts[0]
-		command, err = _parseAttr(pathParts[1:])
+		command, err = parseAttrFn(pathParts[1:])
 	}
 	if err != nil {
 		return "", command, err
@@ -292,7 +292,7 @@ func getShellAndParams(cmd string, customShell string, isWindows bool) (shell st
 	case customShell == "":
 		cmdLine, err := shellwords.Parse(cmd)
 		if err != nil {
-			return shell, params, fmt.Errorf("Parse '%s' failed: %s", cmd, err)
+			return shell, params, fmt.Errorf("failed parse %q: %s", cmd, err)
 		}
 
 		shell, params = cmdLine[0], cmdLine[1:]
