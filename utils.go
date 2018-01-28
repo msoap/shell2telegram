@@ -83,7 +83,7 @@ func execShell(shellCmd, input string, varsNames []string, userID, chatID int, u
 		{"S2T_LOGIN", userName},
 		{"S2T_USERID", strconv.Itoa(userID)},
 		{"S2T_USERNAME", userDisplayName},
-		{"S2T_CHATID", strconv.Itoa(userID)},
+		{"S2T_CHATID", strconv.Itoa(chatID)},
 	}
 	for _, row := range s2tVariables {
 		osExecCommand.Env = append(osExecCommand.Env, fmt.Sprintf("%s=%s", row.name, row.value))
