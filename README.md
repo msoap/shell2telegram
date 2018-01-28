@@ -66,7 +66,7 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -users-db=<FILENAME> : file for store users
         -cache=N             : caching command out for N seconds
         -one-thread          : run each shell command in one thread
-        -public              : bot is public (dont add /auth* commands)
+        -public              : bot is public (don't add /auth* commands)
         -sh-timeout=N        : set timeout for execute shell command (in seconds)
         -shell="shell"       : shell for execute command, "" - without shell (default "sh")
         -version

@@ -64,7 +64,7 @@ type Config struct {
 	allowAll               bool     // allow all user (DANGEROUS!)
 	logCommands            bool     // logging all commands
 	persistentUsers        bool     // load/save users from file
-	isPublicBot            bool     // bot is public (dont add /auth* commands)
+	isPublicBot            bool     // bot is public (don't add /auth* commands)
 	oneThread              bool     // run each shell commands in one thread
 }
 
@@ -96,7 +96,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.BoolVar(&appConfig.persistentUsers, "persistent-users", false, "load/save users from file (default ~/.config/shell2telegram.json)")
 	flag.StringVar(&appConfig.usersDB, "users-db", "", "file for store users")
 	flag.IntVar(&appConfig.cache, "cache", 0, "caching command out (in seconds)")
-	flag.BoolVar(&appConfig.isPublicBot, "public", false, "bot is public (dont add /auth* commands)")
+	flag.BoolVar(&appConfig.isPublicBot, "public", false, "bot is public (don't add /auth* commands)")
 	flag.IntVar(&appConfig.shTimeout, "sh-timeout", 0, "set timeout for execute shell command (in seconds)")
 	flag.StringVar(&appConfig.shell, "shell", "sh", "custom shell or \"\" for execute without shell")
 	flag.BoolVar(&appConfig.oneThread, "one-thread", false, "run each shell command in one thread")

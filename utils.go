@@ -117,7 +117,7 @@ func errChain(chainFuncs ...func() error) error {
 	return nil
 }
 
-// return 2 strings, second="" if string dont contain space
+// return 2 strings, second="" if string don't contain space
 func splitStringHalfBySpace(str string) (one, two string) {
 	array := regexp.MustCompile(`\s+`).Split(str, 2)
 	one, two = array[0], ""
@@ -147,7 +147,7 @@ func getRandomCode() string {
 // parseBotCommand - parse command-line arguments for one bot command
 func parseBotCommand(pathRaw, shellCmd string) (path string, command Command, err error) {
 	if len(pathRaw) == 0 || pathRaw[0] != '/' {
-		return "", command, fmt.Errorf("error: path %s dont starts with /", pathRaw)
+		return "", command, fmt.Errorf("error: path %s don't starts with /", pathRaw)
 	}
 	if stringIsEmpty(shellCmd) {
 		return "", command, fmt.Errorf("error: shell command cannot be empty")

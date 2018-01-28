@@ -306,9 +306,9 @@ func (users *Users) SaveToDB(usersDBFile string) {
 		}
 
 		fileNamePath := getDBFilePath(usersDBFile, true)
-		json, err := json.MarshalIndent(usersList, "", "  ")
+		jsonBytes, err := json.MarshalIndent(usersList, "", "  ")
 		if err == nil {
-			err = ioutil.WriteFile(fileNamePath, json, 0644)
+			err = ioutil.WriteFile(fileNamePath, jsonBytes, 0644)
 		}
 
 		if err == nil {

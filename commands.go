@@ -243,7 +243,7 @@ func cmdShell2telegramBroadcastToRoot(ctx Ctx) (replayMsg string) {
 	} else {
 		ctx.users.BroadcastForRoots(ctx.messageSignal,
 			fmt.Sprintf("Message from %s:\n%s", ctx.users.String(ctx.userID), message),
-			ctx.userID, // dont send self
+			ctx.userID, // don't send self
 		)
 		replayMsg = "Message sent"
 	}
