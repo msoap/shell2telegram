@@ -1,7 +1,9 @@
 name: shell2telegram
 version: '1.7'
-summary: shell2telegram
-description: Telegram bot constructor from command-line
+summary: Telegram bot constructor from command-line
+description: |
+  Telegram bot constructor from command-line, written in Go.
+  Settings through two command line arguments, bot-command and shell command.
 grade: stable
 confinement: strict
 
