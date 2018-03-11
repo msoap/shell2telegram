@@ -7,10 +7,11 @@ confinement: strict
 
 parts:
   shell2telegram:
+    after: [go]
     source: .
     plugin: go
     go-importpath: github.com/msoap/shell2telegram
-    after: [go]
+    build: go install -v -ldflags="-w -s" ./...
   go:
     source-tag: go1.10
 
