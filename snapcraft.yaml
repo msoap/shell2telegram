@@ -1,0 +1,17 @@
+name: shell2telegram
+version: '1.7'
+summary: shell2telegram
+description: Create Telegram bot from command-line
+grade: stable
+confinement: strict
+
+parts:
+  shell2telegram:
+    source: .
+    plugin: go
+    go-importpath: github.com/msoap/shell2telegram
+
+apps:
+  shell2telegram:
+    command: shell2telegram
+    plugs: [network, home]
