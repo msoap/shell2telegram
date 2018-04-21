@@ -47,9 +47,9 @@ const SecondsForOldUsersBeforeVacuum = 1200
 // NewUsers - create Users object
 func NewUsers(appConfig Config) Users {
 	users := Users{
-		list: map[int]*User{},
 		predefinedAllowedUsers: map[string]bool{},
 		predefinedRootUsers:    map[string]bool{},
+		list:                   map[int]*User{},
 		needSaveDB:             true,
 	}
 
