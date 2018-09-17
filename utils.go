@@ -319,7 +319,7 @@ func (v urlValue) Set(s string) error {
 	if err != nil {
 		return err
 	} else if u.Scheme == "" || u.Host == "" {
-		return fmt.Errorf("missing scheme in '%s'", s)
+		return fmt.Errorf("missing host or scheme in '%s'", s)
 	}
 
 	*v.URL = *u

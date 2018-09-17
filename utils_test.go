@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"reflect"
 	"testing"
@@ -367,5 +368,30 @@ func Test_getShellAndParams(t *testing.T) {
 	_, _, err = getShellAndParams("ls '-l", "", false)
 	if err == nil {
 		t.Errorf("6. getShellAndParams() failed")
+	}
+}
+
+func Test_flagURL(t *testing.T) {
+	data := []struct {
+		in  string
+		err string
+	}{
+		{"http://example.com", ""},
+		{"https://bot.example.com/path/to/bot", ""},
+		{"https://", "missing host or scheme in 'https://'"},
+		{"localhost", "missing host or scheme in 'localhost'"},
+	}
+
+	u := urlValue{&url.URL{}}
+	for _, item := range data {
+		var errStr string
+		err := u.Set(item.in)
+		if err != nil {
+			errStr = err.Error()
+		}
+
+		if errStr != item.err {
+			t.Errorf("Failing for \"%s\"\nexpected: (%#v)\nreal: (%#v)\n", item.in, item.err, err)
+		}
 	}
 }
