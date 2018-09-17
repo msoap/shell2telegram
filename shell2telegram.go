@@ -392,7 +392,7 @@ func main() {
 				users.SaveToDB(appConfig.usersDB)
 			}
 			if server != nil {
-				server.Close()
+				log.Println(server.Close())
 			}
 			doExit = true
 		}
