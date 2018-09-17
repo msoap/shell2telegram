@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"regexp"
@@ -299,4 +300,28 @@ func getShellAndParams(cmd string, customShell string, isWindows bool) (shell st
 	}
 
 	return shell, params, nil
+}
+
+// ------------------------------
+type urlValue struct {
+	URL *url.URL
+}
+
+func (v urlValue) String() string {
+	if v.URL != nil {
+		return v.URL.String()
+	}
+	return ""
+}
+
+func (v urlValue) Set(s string) error {
+	u, err := url.Parse(s)
+	if err != nil {
+		return err
+	} else if u.Scheme == "" || u.Host == "" {
+		return fmt.Errorf("missing scheme in '%s'", s)
+	}
+
+	*v.URL = *u
+	return nil
 }

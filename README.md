@@ -74,6 +74,8 @@ Get token from [BotFather bot](https://telegram.me/BotFather), and set TB_TOKEN 
         -tb-token=<TOKEN>    : setting bot token (or set TB_TOKEN variable)
         -timeout=N           : setting timeout for bot (default 60 sec)
         -description=<TITLE> : setting description of bot
+        -bind-addr=<ADDRESS> : address to listen incoming webhook requests
+        -webhook=<URL>       : url for registering a webhook
         -persistent-users    : load/save users from file (default ~/.config/shell2telegram.json)
         -users-db=<FILENAME> : file for store users
         -cache=N             : caching command out for N seconds
@@ -161,6 +163,10 @@ Examples
     shell2telegram /get  'osascript -e "output volume of (get volume settings)"' \
                    /up   'osascript -e "set volume output volume (($(osascript -e "output volume of (get volume settings)")+10))"' \
                    /down 'osascript -e "set volume output volume (($(osascript -e "output volume of (get volume settings)")-10))"'
+
+    # using with webhook instead of poll
+    shell2telegram -bind-addr=0.0.0.0:8080 -webhook=https://bot.example.com/path/to/bot \
+                   /date /date
 
 Links
 -----
