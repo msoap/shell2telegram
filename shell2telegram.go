@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -56,6 +57,8 @@ type Config struct {
 	predefinedAllowedUsers []string // telegram users who are allowed to chat with the bot
 	predefinedRootUsers    []string // telegram users, who confirms new users in their private chat
 	description            string   // description of bot
+	bindAddr               string   // bind address to listen webhook requests
+	webhookURL             url.URL  // url for the webhook
 	usersDB                string   // file for store users
 	shell                  string   // custom shell
 	cache                  int      // caching command out (in seconds)
@@ -90,6 +93,8 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	flag.StringVar(&appConfig.token, "tb-token", "", "setting bot token (or set TB_TOKEN variable)")
 	flag.BoolVar(&appConfig.addExit, "add-exit", false, "adding \"/shell2telegram exit\" command for terminate bot (for roots only)")
 	flag.IntVar(&appConfig.botTimeout, "timeout", DefaultBotTimeout, "setting timeout for bot")
+	flag.StringVar(&appConfig.bindAddr, "bind-addr", "", "bind address to listen webhook requests, like: 0.0.0.0:8080")
+	flag.Var(&urlValue{&appConfig.webhookURL}, "webhook", "url of bot's webhook")
 	flag.BoolVar(&appConfig.allowAll, "allow-all", false, "allow all users (DANGEROUS!)")
 	flag.BoolVar(&appConfig.logCommands, "log-commands", false, "logging all commands")
 	flag.StringVar(&appConfig.description, "description", "", "setting description of bot")
@@ -229,9 +234,26 @@ func main() {
 
 	tgbotConfig := tgbotapi.NewUpdate(0)
 	tgbotConfig.Timeout = appConfig.botTimeout
-	botUpdatesChan, err := bot.GetUpdatesChan(tgbotConfig)
-	if err != nil {
-		log.Fatal(err)
+	var botUpdatesChan <-chan tgbotapi.Update
+	var server *http.Server
+
+	if appConfig.bindAddr != "" {
+		_, err = bot.SetWebhook(tgbotapi.WebhookConfig{URL: &appConfig.webhookURL})
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		botUpdatesChan = bot.ListenForWebhook(appConfig.webhookURL.Path)
+		server = &http.Server{Addr: appConfig.bindAddr}
+		go func() {
+			log.Println("Listening incoming requests at ", appConfig.bindAddr)
+			log.Fatal(server.ListenAndServe())
+		}()
+	} else {
+		botUpdatesChan, err = bot.GetUpdatesChan(tgbotConfig)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	users := NewUsers(appConfig)
@@ -368,6 +390,9 @@ func main() {
 			if appConfig.persistentUsers {
 				users.needSaveDB = true
 				users.SaveToDB(appConfig.usersDB)
+			}
+			if server != nil {
+				log.Println(server.Close())
 			}
 			doExit = true
 		}
