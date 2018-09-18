@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "SHELL2TELEGRAM" "" "March 2018" "" ""
+.TH "SHELL2TELEGRAM" "" "September 2018" "" ""
 .
 .SH "NAME"
 \fBshell2telegram\fR
@@ -118,6 +118,8 @@ options:
     \-tb\-token=<TOKEN>    : setting bot token (or set TB_TOKEN variable)
     \-timeout=N           : setting timeout for bot (default 60 sec)
     \-description=<TITLE> : setting description of bot
+    \-bind\-addr=<ADDRESS> : address to listen incoming webhook requests
+    \-webhook=<URL>       : url for registering a webhook
     \-persistent\-users    : load/save users from file (default ~/\.config/shell2telegram\.json)
     \-users\-db=<FILENAME> : file for store users
     \-cache=N             : caching command out for N seconds
@@ -273,6 +275,10 @@ shell2telegram /alarm:vars=SLEEP,MSG \'sleep $SLEEP; echo Hello $S2T_USERNAME; e
 shell2telegram /get  \'osascript \-e "output volume of (get volume settings)"\' \e
                /up   \'osascript \-e "set volume output volume (($(osascript \-e "output volume of (get volume settings)")+10))"\' \e
                /down \'osascript \-e "set volume output volume (($(osascript \-e "output volume of (get volume settings)")\-10))"\'
+
+# using with webhook instead of poll
+shell2telegram \-bind\-addr=0\.0\.0\.0:8080 \-webhook=https://bot\.example\.com/path/to/bot \e
+               /date /date
 .
 .fi
 .
