@@ -5,7 +5,7 @@ APP_MAINTAINER := $$(git show HEAD | awk '$$1 == "Author:" {print $$2 " " $$3 " 
 GIT_TAG := $$(git describe --tags --abbrev=0)
 
 run:
-	go run $$(ls *.go | grep -v _test.go) $${TB_ROOT:+-root-users=$$TB_ROOT} \
+	go run . $${TB_ROOT:+-root-users=$$TB_ROOT} \
         -add-exit \
         -log-commands \
         -persistent-users \
