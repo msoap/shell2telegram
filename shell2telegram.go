@@ -183,7 +183,9 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, is
 		case "image/bmp":
 			fileName = "file.bmp"
 		case "video/mp4":
-			fileName = "file.mp4"
+			// TODO: nedded migrate to new telegram-bot-api library
+			log.Printf("not supported")
+			return
 		default:
 			fileName = "message"
 		}
