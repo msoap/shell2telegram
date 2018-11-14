@@ -182,6 +182,8 @@ func sendMessage(messageSignal chan<- BotMessage, chatID int, message []byte, is
 			fileName = "file.gif"
 		case "image/bmp":
 			fileName = "file.bmp"
+		case "video/mp4":
+			fileName = "file.mp4"
 		default:
 			fileName = "message"
 		}
