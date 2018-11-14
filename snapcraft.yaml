@@ -14,7 +14,7 @@ parts:
     plugin: go
     go-importpath: github.com/msoap/shell2telegram
   go:
-    source-tag: go1.11
+    source-tag: go1.10
 
 apps:
   shell2telegram:
