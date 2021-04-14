@@ -6,6 +6,7 @@ description: |
   Settings through two command line arguments, bot-command and shell command.
 grade: stable
 confinement: strict
+base: core20
 
 parts:
   shell2telegram:
