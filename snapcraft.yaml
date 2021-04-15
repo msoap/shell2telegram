@@ -6,18 +6,16 @@ description: |
   Settings through two command line arguments, bot-command and shell command.
 grade: stable
 confinement: strict
-base: core20
+base: core18
 
 parts:
   shell2telegram:
-    after: [go]
-    source: .
     plugin: go
     go-importpath: github.com/msoap/shell2telegram
-  go:
-    source-tag: go1.10
+    source: .
+    source-type: git
 
 apps:
   shell2telegram:
-    command: shell2telegram
+    command: bin/shell2telegram
     plugs: [network, home]
