@@ -168,6 +168,9 @@ Examples
     shell2telegram -bind-addr=0.0.0.0:8080 -webhook=https://bot.example.com/path/to/bot \
                    /date /date
 
+    # command with Markdown formating, calendar in monospace font
+    shell2telegram /cal:md 'echo "\`\`\`$(ncal)\`\`\`"'
+
 Links
 -----
 
