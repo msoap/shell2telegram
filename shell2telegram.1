@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "SHELL2TELEGRAM" "" "November 2018" "" ""
+.TH "SHELL2TELEGRAM" "" "April 2021" "" ""
 .
 .SH "NAME"
 \fBshell2telegram\fR
@@ -78,9 +78,6 @@ docker run \-e TB_TOKEN=******* \-\-rm test\-bot
 .IP "" 0
 .
 .P
-Mirror docker repository \fIhttps://quay\.io/repository/msoap/shell2telegram\fR: \fBquay\.io/msoap/shell2telegram:latest\fR
-.
-.P
 Using snap (Ubuntu or any Linux distribution with snap):
 .
 .IP "" 4
@@ -99,6 +96,9 @@ sudo snap refresh shell2telegram
 .fi
 .
 .IP "" 0
+.
+.P
+Notice: the snap\-package has its own sandbox with the \fB/bin\fR, \fB/usr/bin\fR directories which are not equal to system\-wide \fBPATH\fR directories\.
 .
 .SH "Usage"
 Get token from BotFather bot \fIhttps://telegram\.me/BotFather\fR, and set TB_TOKEN var in shell
@@ -279,6 +279,9 @@ shell2telegram /get  \'osascript \-e "output volume of (get volume settings)"\' 
 # using with webhook instead of poll
 shell2telegram \-bind\-addr=0\.0\.0\.0:8080 \-webhook=https://bot\.example\.com/path/to/bot \e
                /date /date
+
+# command with Markdown formating, calendar in monospace font
+shell2telegram /cal:md \'echo "\e`\e`\e`$(ncal)\e`\e`\e`"\'
 .
 .fi
 .

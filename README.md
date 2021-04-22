@@ -44,8 +44,6 @@ And build and run:
     # or run with set token from command line
     docker run -e TB_TOKEN=******* --rm test-bot
 
-Mirror docker [repository](https://quay.io/repository/msoap/shell2telegram): `quay.io/msoap/shell2telegram:latest`
-
 Using snap (Ubuntu or any Linux distribution with snap):
 
     # install stable version:
@@ -56,6 +54,8 @@ Using snap (Ubuntu or any Linux distribution with snap):
     
     # update
     sudo snap refresh shell2telegram
+
+Notice: the snap-package has its own sandbox with the `/bin`, `/usr/bin` directories which are not equal to system-wide `PATH` directories.
 
 Usage
 -----
