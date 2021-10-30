@@ -1,7 +1,7 @@
 <img src="https://raw.githubusercontent.com/msoap/shell2telegram/misc/img/shell2telegram_icon.png" width="32" height="32"> shell2telegram
 -----------------------------------------------------------------------------------------------------------------------------------------
 
-[![Build Status](https://travis-ci.org/msoap/shell2telegram.svg?branch=master)](https://travis-ci.org/msoap/shell2telegram)
+[![Go build status](https://github.com/msoap/shell2telegram/actions/workflows/go.yml/badge.svg)](https://github.com/msoap/shell2telegram/actions/workflows/go.yml)
 [![Coverage Status](https://coveralls.io/repos/github/msoap/shell2telegram/badge.svg?branch=master)](https://coveralls.io/github/msoap/shell2telegram?branch=master)
 [![Docker Pulls](https://img.shields.io/docker/pulls/msoap/shell2telegram.svg?maxAge=3600)](https://hub.docker.com/r/msoap/shell2telegram/)
 [![Homebrew formula exists](https://img.shields.io/badge/homebrew-🍺-d7af72.svg)](https://github.com/msoap/shell2telegram#install)
