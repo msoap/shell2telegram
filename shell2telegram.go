@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	// Version - current version
-	Version = "1.8"
+	// version - current version
+	version = "1.8"
 
 	// DefaultBotTimeout - bot default timeout
 	DefaultBotTimeout = 60
@@ -108,7 +108,7 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	logFilename := flag.String("log", "", "log `filename`, default - STDOUT")
 	predefinedAllowedUsers := flag.String("allow-users", "", "telegram users who are allowed to chat with the bot (\"user1,user2\")")
 	predefinedRootUsers := flag.String("root-users", "", "telegram users, who confirms new users in their private chat (\"user1,user2\")")
-	version := flag.Bool("version", false, "get version")
+	showVersion := flag.Bool("version", false, "get version")
 
 	flag.Usage = func() {
 		fmt.Printf("usage: %s [options] %s\n%s\n%s\n\noptions:\n",
@@ -122,8 +122,8 @@ func getConfig() (commands Commands, appConfig Config, err error) {
 	}
 	flag.Parse()
 
-	if *version {
-		fmt.Println(Version)
+	if *showVersion {
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
