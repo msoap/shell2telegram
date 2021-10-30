@@ -8,8 +8,7 @@ RUN apk add --no-cache git
 ADD . $GOPATH/src/github.com/msoap/shell2telegram
 WORKDIR $GOPATH/src/github.com/msoap/shell2telegram
 ENV CGO_ENABLED=0
-RUN go get -t -v ./...
-RUN go install -a -v -ldflags="-w -s" ./...
+RUN go build -v -trimpath -ldflags="-w -s -X 'main.version=$(git describe --abbrev=0 --tags | sed s/v//)'" -o /go/bin/shell2telegram .
 
 # final image
 FROM alpine
