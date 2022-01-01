@@ -23,9 +23,8 @@ Or download binaries from: [releases](https://github.com/msoap/shell2telegram/re
 
 Or build from source:
 
-    # install Go
     # set $GOPATH if needed
-    go get -u github.com/msoap/shell2telegram
+    go install github.com/msoap/shell2telegram@latest
     ln -s $GOPATH/bin/shell2telegram ~/bin/shell2telegram # or add $GOPATH/bin to $PATH
 
 Or build image and run with Docker.
