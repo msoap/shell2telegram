@@ -55,7 +55,7 @@ func cmdAuth(ctx Ctx) (replayMsg string) {
 				log.Print("authorized: ", ctx.users.String(ctx.userID))
 			}
 		} else {
-			replayMsg = fmt.Sprintf("Code is not valid.")
+			replayMsg = "Code is not valid."
 		}
 	}
 
